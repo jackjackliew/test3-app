@@ -1,0 +1,161 @@
+read_orders - default can only access to last 60 days of the orders history
+read_all_orders - request premission to access for all orders history, after permission granted, can access to all orders history as stated in the shopify site
+
+
+possible fields
+
+{ order id, createdAt, cancelledAt, cancelReason, discountCodes, customer { id, displayName, defaultAddress, email, emailMarketingConsent }, displayFulfillmentStatus, displayFinancialStatus, transactions { id, kind, status, amountSet { presentmentMoney, shopMoney } } }
+
+
+advantages for customers
+
+- customers able to track if the customer order received is from google ads that customers paid to advertise their products or is it organic customer that comes without the use of ads. By retriving order id from shopify order data and order id data from google analytics and match them together to check if the order created was from google ads or not. then you can use this information to calculate the sales you have compared with the ads cost to see if it is worth to continue with the ads
+
+- we can use this information to find out about the consumers behavior like for daily basis, what timing that the orders come in the most from your ads
+
+- can also check customer's orders type preferences and are there any repeat order from the customers for the same products, so that you can do retargeting
+
+- able to check if the refunds are high or low for the orders that comes from the ads or to check if orders that comes from the ads are always pending or not, is also a way to check if you have target the right audience 
+
+- able to check if the specific delivery area has alot of orders, so that customers are able to identify potential location with high buying power (based on customer default address, the one that place the order)
+
+- if we can get data from all the marketing platforms eg: google, facebook, instagram etc... we can track the order based on which ads they are coming from, and to be able to compare which platform and audiences is more effective for customer's products.
+
+ - probably possible to collect the age/gender from the ads source that placed the order and we can use this information to find out the customer's products suitable for which age group or gender
+
+
+
+-----------------------------------------------------------------------------------------
+
+
+
+1. can you create multiple store? and is it possible to pull data from multiple store together and identify which data belongs to the correct store that is pulled from
+
+// answer: For same client that have multiple store, we cant pull data from multiple store simultaneously, you have to access the store using seperate routes, for exmaples app.get("/shop1"), app.get("/shop2"), but have to end the session whenever you changed store because the access token that got stored in the session will be different, can check if the store URL changes, then have to Oauth again to let the session know that you changed store so that it will get the correct access token for the store that you want to access to, then you are able to pull the correct data from selected store.
+
+// answer: For same client that have multiple store, we cant pull data from multiple store simultaneously, have to end the session whenever you changed store because the access token that got stored in the session will be different, can check if the store URL changes, then have to Oauth again to let the session know that you changed store so that it will get the correct access token for the store that you want to access to, then you are able to pull the correct data from selected store.
+
+
+2. check to see if the token will expired? how long will it expired? what will trigger it to expired? and if expired what will you do to connect again in your code. also have to cater to catch errors whenever there's issue accessing the store. it could have been token timed out or permission issue or something else.
+
+// answer: the access token for shopify store never expires, the only thing that will expires or reset is the session. from the documentation says that session ends after 30 minutes of no activity, and at midnight UTC
+
+
+3. test the transactions to see if multiple transactions are allow for a single order, and find out about partial refund and partial payment and what is the field capture means?
+
+// answer: yes, multiple transactions are allowed in a single order, it can have transaction status of like fail, success or pending etc... and can allow partial refund as well, if the order have 3 items and only 1 item is being refunded then it will be consider partial refund.
+
+
+4. maybe in your database field you could add a 2 separate fields like sales and refund, so if the order is being refunded, it will not affect the sales data field, and also consider when is the cut off date. for example if the sales are cut off every month then if some of the order was refunded after 2 months later, how would you handle this issue?
+
+// answer: sales and refund is better to be seperated. i think as well as pending, it is best to seperate this field so that is easier to be managed in the future. clients can just see the sales , refund or pending in a seperate view.
+
+
+5. structure your order data first that you get from shopify. structure what field is really necessary for total order sales. the only thing customers would like to see and know
+
+
+6. get 1 order total sales first then slowly expand from there.
+
+
+
+-----------------------------------------------------------------------------------------
+
+
+
+Summary 
+the aim here is to get the total sales from the client's store. to achieve that we have to pull the transactions of the order from the store. 
+
+total sales = store --> orders --> transactions --> amount
+
+the field in the orders section we will be getting consists of order ID, created at, total discount set, display financial status(possible) 
+(will add in more if needed)
+the field in the transactions section we will be getting consists of transaction ID, created at, kind of transaction, transaction status, amount 
+(will add in more if needed)
+the amount in transaction will be the total sales for the store after it is total up. might include transaction with pending status or refund status 
+
+what i plan to work on
+1. if the client have multiple store, is it possible to access multiple store and pull the order data from those stores at the same time and also able to identity the data comes from which store.
+2. check to see if the token will expired? how long will it expired? what will trigger it to expired? and if expired how will it get the token again to access the store. also have to cater to catch errors whenever there's issue accessing the store. it could have been token timed out or permission issue or something else.
+3. have to consider when is the cut off date/time, and if for example the refunds comes in after the cut off date or the order with pending status turns paid after the cut off date/time, how will it be handled.
+4. have to check is there a partial payment or partial refunds, if there is, have to consider how should it be handled.
+
+
+-----------------------------------------------------------------------------------------
+
+
+cookie: 'shopify_app_session=offline_whatalsosell.myshopify.com; 
+shopify_app_session.sig=tFao5eGqkGfIKATfROTj2GvxmsQ; 
+shopify_app_state.sig=rMiaZ7A8njxSv7DpS7GODpdMMcI'
+
+cookie: 'shopify_app_state.sig=SfttTes_LxIlWp_dIwBfsSp8wGk; 
+shopify_app_session=offline_whatalsosell.myshopify.com; 
+shopify_app_session.sig=tFao5eGqkGfIKATfROTj2GvxmsQ'
+
+cookie: 'shopify_app_session=offline_whatalsosell.myshopify.com; 
+shopify_app_session.sig=tFao5eGqkGfIKATfROTj2GvxmsQ', 'if-none-match': 'W/"14-Ndv+ngwA3DsgloGwy71LKycD3Ag"'
+
+
+
+
+cookie: 'shopify_app_state.sig=xXxYWvcmjobs1wv2hHzT474_ZUQ; 
+shopify_app_session=offline_what7alsosell.myshopify.com; 
+shopify_app_session.sig=rlgF9uFMEtjegQnpQE8t89rZt9w'
+
+cookie: 'shopify_app_state.sig=xXxYWvcmjobs1wv2hHzT474_ZUQ; 
+shopify_app_session=offline_what7alsosell.myshopify.com; 
+shopify_app_session.sig=rlgF9uFMEtjegQnpQE8t89rZt9w','if-none-match': 'W/"14-k9rQjvLIqgUUdOapdxbJeTHi+HQ"'
+
+
+my progress now, I have done pagination for when i pull data from shopify, so it will loop to pull all the orders data for that selected date frame until it's finish.
+
+my next step now will be converting all the raw data pulled from shopify and put into a table that has the date & time field and the total sales amount for that day. i will also include total tax amount, total shipping amount, and total refund amount. so we can call it to be displayed based on a single day or a date range.
+
+
+
+
+i will do an input for date range to retrive data from shopify. if the parameter is empty, i will set a default to retrive the data 60 days ago from current date from shopify. then store this raw data into a database with the field of order created date & time, order id, shop id, transaction id, order financial status, transaction created date & time, transaction kind, transaction status, transaction amount. then in order to display it, have to input a date or a date range as a parameter so that it will calculate total sales, total refunds, or maybe total tax and shipping, then store it into a new table and display it. and i will pass in the shop id as a parameter as well when getting total sales, so that it can identify the date that is pass in is belongs to which shop order.
+
+
+
+
+
+ok so first step for now, when a shopify store owner use this app, it will ask to key in shop domain and access token which can be found in the shopify admin, then it will authenticate to see if both of the inputs are valid. 
+
+after authentication success, it will first retrieve the shop id first, it will ask user to input a start date and an end date for the orders to be retrieve, if user choose not to input, it will retrieve 7 days or 30 days or 60 days or 90 days by default based on how what i set as the default.
+
+then based on the parameters, it will retrieve the raw data from shopify and store it in a database including the shop id. so from here, the user can put in a date range for the total sales to be displayed. it will calculate based on the parameters given and also the shop id to identify the correct data to be calculated.
+
+
+
+
+I just had a discussion with @kyle, let me try to explain it again, correct me if I'm wrong again. what i have done now is that i have a script that needs to take in shop domain and access token in order to get access to the particular store, and also will authenticate success if shop domain and access token match, and fail if not match.
+
+I have a getOrders script that i hard-coded to retrieve the raw data for past 60 days from the shop, this will run after the authentication success. so these few days i have some discussion with kyle, and i have added pagination into the script and loop through it so when pulling the data from the given date, it will pull until there is not more next page. and i will be adding in now the input for date range, as a parameter when pulling data from the shop so this will just pull based on that date range. so if no input then the script will run the default retrieve for past 60 days data that i hard-coded. all these data pulled will then pass into an insert into transactions script to store into database.
+
+i have just added a getAccess script so that this will query to retrieve the shop id first when authentication success. then I will take away the authentication process from the getOrders script. so the authentication process will be process here then only proceed to the getOrders script.
+
+on the postgres database i have created a transactions table and created an insert into transactions table script to store the raw data that i pulled from the shop. like order id, shop id, transaction created date & time, transaction kind, transaction status, transaction amount and etc...
+
+
+
+
+
+let me try to explain it again, correct me if I'm wrong, so what my program do is, it will collect the order data from the shopify store and help to calculate the total sales amount and display them. all you need is to just key in the shop URL and the access token, then choose the date of the sales to be calculated and display.
+
+so right now i have a website that lets you key in the shop URL and access token as an input, so that i can get access to the shop's data. on the website will just be 2 text box to type in the shop url and token, have to do this every single time for now. I havent get into the part where customer just only have to key in the details once.
+
+after i have access to the shop, i have a function that pulls the order and transaction data from the shop, and i have actually hardcoded to automatically pull past 60 days data, then store them into a database, but after i have discussed with kyle, I have added 2 date box to choose from, a start date and end date. so now the function will pull the data from the shop based on the date given, then if we didnt choose any date, it will pull past 60 days data from the shop instead.
+
+then to display the total sales, i have a function that takes past 30 days transaction amount and sums it to display as total sales, but after i have a discussion with kyle, i am now trying to add in a date range to choose, a start date and end date, so my function will have to calculate the total sales and display it based on only that date range given. And also there is a problem with not able to identify which shop transaction amount data to get from if there are alot of different shops data in the same table. so i have added in a function to pull the shop id right when i have access to the shop. so this can be stored together in the table so can easily identify which transaction data belongs to which shop.
+
+
+
+
+
+so there are 3 types of distribution model for us to how we let our merchant use our app. there are shopify admin, single merchant install link and shopify app store.
+
+so for shopify admin method, for merchant to use our app they will have to allow app development for their shop and then select the scopes that we need to have access to then after that it will generate an access token which will only be reveal once, so they have to copy it and put it somewhere safe. then they have to give us his shop access token so that our app can have access. and if the merchant have multiple shops they will have to repeat the steps above for all of their shops. this will be very complicated for merchants and is not a very good way to ask them to give their access token to us, and is also dangerous if they lost their access token.
+
+as for single merchant install link is a better approach compare to the shopify admin method as it does not require the merchant to do all the steps that are done in shopify admin, and they do not need to pass us their access token. but this method has a downside which this app that we create will be tied to a store, we can only generate one install link to one merchant for their one shop. so if that single merchant have multiple stores, we have to create the app many times to generate the link for each stores. unless we and the merchants go for the shopify plus service which have to pay starting at 2000USD per month subscription.
+
+so for the last option, which i think suits us better will be the shopify app store method. this method is the same as the single merchant install link method above but is not tie to a store, every merchants can use it and can also use by merchants that have multiple stores, but this method will require us to fulfill some of shopify's requirements and to publish our app and let shopify approve it. from what i read the main requirements we have to fulfill will be following their rules on deleting personal data and shop data. and also not to divert the shopify checkouts to other web for payment processing.

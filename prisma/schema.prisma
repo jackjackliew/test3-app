@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Daily_insight {
+  created_at           DateTime @db.Timestamp(6)
+  total_sales_amount   Int?
+  total_refunds_amount Int?
+  shop Shop @relation(fields: [shop_id], references: [shop_id], onDelete: Cascade)
+  shop_id              String   @db.VarChar
+
+  @@id([created_at, shop_id])
+}
+
+model Order {
+  createdat                                       DateTime? @db.Timestamp(6)
+  displayfinancialstatus                          String?   @db.VarChar
+  displayfulfillmentstatus                        String?   @db.VarChar
+  discountcodes                                   String[]  @db.VarChar
+  totaldiscountsset_presentmentmoney_amount       Int?
+  totaldiscountsset_presentmentmoney_currencycode String?   @db.VarChar
+  totaldiscountsset_shopmoney_amount              Int?
+  totaldiscountsset_shopmoney_currencycode        String?   @db.VarChar
+  reference_order_id                              String    @id @unique @db.VarChar
+  shop Shop @relation(fields: [shop_id], references: [shop_id], onDelete: Cascade)
+  shop_id                                         String    @db.VarChar
+
+  transactions Transaction[]
+}
+
+model Transaction {
+  reference_transaction_id         String    @id @unique @db.VarChar
+  transaction_created_at           DateTime? @db.Timestamp(6)
+  transaction_kind                 String?   @db.VarChar
+  transaction_status               String?   @db.VarChar
+  transaction_presentment_amount   Int?
+  transaction_presentment_currency String?   @db.VarChar
+  transaction_shop_amount          Int?
+  transaction_shop_currency        String?   @db.VarChar
+  
+  order Order @relation(fields: [reference_order_id], references: [reference_order_id], onDelete: Cascade)
+  reference_order_id               String    @db.VarChar
+}
+
+model Shop {
+  shop_id      String  @unique @db.VarChar
+  shop_name    String? @db.VarChar
+  shop_url     String  @unique @db.VarChar
+  access_token String  @unique @db.VarChar
+
+  orders Order[]
+  daily_insights Daily_insight[]
+}
