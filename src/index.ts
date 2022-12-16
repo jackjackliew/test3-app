@@ -75,14 +75,6 @@ app.get("/", async (req, res) => {
 });
 
 app.get("/home", async (req, res) => {
-  // console.log(ACTIVE_SHOPIFY_SHOPS[SHOP] + " shop 1 ");
-  // const session = await Shopify.Utils.loadCurrentSession(req, res);
-  // console.log(session);
-  // //  This shop hasn't been seen yet, go through OAuth to create a session
-  // if (ACTIVE_SHOPIFY_SHOPS[SHOP] === undefined) {
-  //    // not logged in, redirect to login
-  //   res.redirect(`/login`);
-  // } else {
     res.send(
       `<html>
         <body>
@@ -161,13 +153,6 @@ app.post("/shopify/getorders", async (req, res) => {
   console.log(req.body.to_created_date);
 
   if(req.body.from_created_date !== '' || req.body.to_created_date !== '') {
-    // if(req.body.from_created_date === '' && req.body.to_created_date !== '') {
-    //   let addOneDay = new Date(req.body.to_created_date);
-    //   addOneDay.setDate(addOneDay.getDate() + 1);
-    //   req.body.to_created_date = addOneDay;
-    // }
-
-    // console.log("add 1 day: " + req.body.to_created_date);
     console.log("shopify get orders" + shop);
     console.log("shopify get orders" + accessToken);
     const client = new Shopify.Clients.Graphql(shop, accessToken);
@@ -232,7 +217,7 @@ app.post("/shopify/getorders", async (req, res) => {
     const fromDay = last.getDate();
     const fromMonth = last.getMonth() + 1;
     const fromYear = last.getFullYear();
-    const toDay = now.getDate() + 1;
+    const toDay = now.getDate();
     const toMonth = now.getMonth() + 1;
     const toYear = now.getFullYear();
     req.body.from_created_date = fromYear + "-" + fromMonth + "-" + ("0" + fromDay).slice(-2);
@@ -398,35 +383,6 @@ app.post("/shopify/getdailytotal", async (req, res) => {
   }
 });
 
-app.get("/shop2", async (req, res) => {
-  console.log(req.query.shop);
-  // console.log(SHOP2);
-  console.log(ACTIVE_SHOPIFY_SHOPS[SHOP2] + " shop 2 ");
-  const session = await Shopify.Utils.loadCurrentSession(req, res);
-  console.log(session);
-  // This shop hasn't been seen yet, go through OAuth to create a session
- if (ACTIVE_SHOPIFY_SHOPS[SHOP2] === undefined || session?.shop !== SHOP2) {
-    // not logged in, redirect to login
-   res.redirect(`/login?store=${SHOP2}`);
- } else {
-   res.send(
-    `<html>
-      <body>
-        <p>Welcome to ${session.shop}</p>
-        <p>You have successfully authenticated and are back at your app.</p>
-        <p><a href="/products">View Products</a></p>
-        <p><a href="/orders">View Orders</a></p>
-        <p><a href="/totalsales">View total sales for last 30 days</a></p>
-        <p><a href="/totalrefund">View total refunds for last 30 days</a></p>
-        <p><a href="/totalpending">View total pendings for last 30 days</a></p>
-      </body>
-    </html>`
-   );
-   // Load your app skeleton page with App Bridge, and do something amazing!
-   res.end();
- }
-});
-
 app.get('/login', async (req, res) => {
   shopName = req.query.shop_name;
 
@@ -458,66 +414,7 @@ app.get('/auth/callback', async (req, res) => {
     console.error(error); // in practice these should be handled more gracefully
   }
 
-  switch(req.query.shop) {
-    case SHOP:
-      return res.redirect(`/?host=${req.query.host}&shop=${req.query.shop}`);  // wherever you want your user to end up after OAuth completes
-    case SHOP2:
-      return res.redirect(`/shop2?host=${req.query.host}&shop=${req.query.shop}`);  // wherever you want your user to end up after OAuth completes
-  }
-  // return res.redirect('/auth/success');
-});
-
-app.get('/products', async (req, res) => {
-
-    const client = new Shopify.Clients.Graphql(SHOP, accessToken);
-
-    const products = await client.query<MyResponseBodyType>({
-      data: `{
-        products (first: 10) {
-          edges {
-            node {
-              id
-              title
-              descriptionHtml
-            }
-          }
-        }
-      }`,
-    });
-    // console.log('Products: ' + JSON.stringify(products));
-
-    let productName = '';
-    
-    for(let i =0; i < products.body.data.products.edges.length; i++) {
-      productName += '<p>' + products.body.data.products.edges[i].node.title + '</p>';
-    }
-
-    res.send(
-      `<html>
-        <body>
-          <p>Products List</p>
-          ${productName}
-        </body>
-      </html>`
-    );
-  // }
-
-});
-
-app.get('/totalsales', getTotalSales30Days);
-app.get('/totalrefund', getTotalRefund30Days);
-app.get('/totalpending', getTotalPending30Days);
-
-app.get('/auth/success', async (req, res) => {
-  res.send(
-    `<html>
-      <body>
-        <p>You have successfully authenticated and are back at your app.</p>
-        <p><a href="/products">View Products</a></p>
-        <p><a href="/orders">View Orders</a></p>
-      </body>
-    </html>`
-  );
+  return res.redirect(`/?host=${req.query.host}&shop=${req.query.shop}`)
 });
 
 app.listen(3000, () => {

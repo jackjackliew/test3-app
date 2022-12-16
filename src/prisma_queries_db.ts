@@ -309,3 +309,113 @@ export const getDailyTotalRefunds = async (date: any, shopId: any) => {
     })
     return getTotalRefunds;
 }
+
+// export const getTotalPendingsTransaction = async (order: any, shopId: any) => {
+//     let date: any = {};
+//     console.log(order.from_created_date);
+//     console.log(order.to_created_date);
+//     let refundsDate;
+//     const getPendings = await prisma.order.findMany({
+//         where: {
+//             createdat: {
+//                 gte: new Date(order.from_created_date),
+//                 lte: new Date(order.to_created_date),
+//             },
+//             displayfinancialstatus: {
+//                 contains: 'PENDING'
+//             },
+//         },
+//         include: {
+//             transactions: {
+//                 select: {
+//                     reference_order_id: true,
+//                     transaction_created_at: true,
+//                     transaction_presentment_amount: true,
+//                 },
+//             },
+//         },
+//         orderBy: {
+//             createdat: 'asc'
+//         },
+//     })
+//     for(let i = 0; i < getPendings.length; i++) {
+//         console.log(getPendings[i]);
+//         console.log("this is the order id for the transaction: " + getPendings[i].reference_order_id);
+//         let order = await getOrderById(getPendings[i].reference_order_id)
+//         if(order?.shop_id === shopId) {
+//             refundsDate = getPendings[i].transaction_created_at;
+//             console.log("salesDate: " + refundsDate);
+//             if(refundsDate) {
+//                 const day = refundsDate.getDate();
+//                 const month = refundsDate.getMonth() + 1;
+//                 const year = refundsDate.getFullYear();
+//                 let convertedRefundsDate = year + "-" + month + "-" + ("0" + day).slice(-2);
+//                 if(Object.keys(date).length === 0) {
+//                     console.log("if the date object length is 0: " + getPendings[i].transaction_presentment_amount);
+//                     console.log("first key: " + convertedRefundsDate);
+//                     date[convertedRefundsDate] = getPendings[i].transaction_presentment_amount;
+//                 } else if(Object.keys(date).length !== 0) {
+//                     console.log("object key: " + date.hasOwnProperty(convertedRefundsDate));
+//                     console.log("after first key: " + convertedRefundsDate);
+//                     if(date.hasOwnProperty(convertedRefundsDate)) {
+//                         date[convertedRefundsDate] += getPendings[i].transaction_presentment_amount;
+//                     } else {
+//                         date[convertedRefundsDate] = getPendings[i].transaction_presentment_amount;
+//                     }
+//                 }
+//             }
+//         } else {
+//             console.log("incorrect shop id");
+//         }
+//     }
+//     console.log(date);
+//     for(const key in date) {
+//         insertDailyTotalRefunds(key, date[key], shopId);
+//     }
+    
+//     return getPendings;
+// }
+
+// export const insertDailyTotalPendings = async (date: any, totalRefunds: any, shopId: any) => {
+//     const insertTotalRefunds = await prisma.daily_insight.upsert({
+//         where: {
+//             created_at_shop_id: {
+//                 created_at: new Date(date),
+//                 shop_id: shopId,
+//             },
+//         },
+//         update: {
+//             total_refunds_amount: totalRefunds,
+//         },
+//         create: {
+//             created_at: new Date(date),
+//             total_refunds_amount: totalRefunds,
+//             shop_id: shopId,
+//         },
+//     })
+//     if(insertTotalRefunds) {
+//         console.log('All total refunds have been inserted');
+//     } else {
+//         console.log("Insert error");
+//     }
+// }
+
+// export const getDailyTotalPendings = async (date: any, shopId: any) => {
+//     const getTotalRefunds = await prisma.daily_insight.findMany({
+//         where: {
+//             created_at: {
+//                 gte: new Date(date.from_created_date),
+//                 lte: new Date(date.to_created_date),
+//             },
+//             shop_id: shopId,
+//         },
+//         select: {
+//             created_at: true,
+//             total_refunds_amount: true,
+//         },
+//         orderBy: {
+//             created_at: 'asc'
+//         },
+//     })
+//     return getTotalRefunds;
+// }
