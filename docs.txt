@@ -159,3 +159,13 @@ so for shopify admin method, for merchant to use our app they will have to allow
 as for single merchant install link is a better approach compare to the shopify admin method as it does not require the merchant to do all the steps that are done in shopify admin, and they do not need to pass us their access token. but this method has a downside which this app that we create will be tied to a store, we can only generate one install link to one merchant for their one shop. so if that single merchant have multiple stores, we have to create the app many times to generate the link for each stores. unless we and the merchants go for the shopify plus service which have to pay starting at 2000USD per month subscription.
 
 so for the last option, which i think suits us better will be the shopify app store method. this method is the same as the single merchant install link method above but is not tie to a store, every merchants can use it and can also use by merchants that have multiple stores, but this method will require us to fulfill some of shopify's requirements and to publish our app and let shopify approve it. from what i read the main requirements we have to fulfill will be following their rules on deleting personal data and shop data. and also not to divert the shopify checkouts to other web for payment processing.
+
+
+
+
+the 4 main things that we want to do now is to get data from database, integrate our code into pique, configure shopify shops in the pique settings, display data at the reports tab alongside with fb data.
+
+but we have now is to able to 
+the plan now is we will append the data from shopify shop to the existing table in pique in report tabs. for this to be done we will add a dropdown box to choose a shopify shops (this will be hardcorded for now). after choosing a shop, it will display the total sales, total refunds, total orders and average order sales for the past 40 days.
+
+and on the settings page there will also be a dropdown
