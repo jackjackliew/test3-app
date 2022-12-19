@@ -22,7 +22,7 @@ const { HOST_SCHEME } = process.env;
 let shop: any;
 let accessToken: any;
 let storedShopId: any;
-// let shopName: any;s
+// let shopName: any;
 
 interface MyResponseBodyType {
   data: any
