@@ -101,7 +101,7 @@ export const getTotalSalesTransaction = async (transaction: any, shopId: any) =>
         where: {
             transaction_created_at: {
                 gte: new Date(transaction.from_created_date),
-                lte: new Date(transaction.to_created_date),
+                lt: new Date(transaction.to_created_date),
             },
             transaction_kind: {
                 contains: 'SALE'
@@ -186,7 +186,7 @@ export const getDailyTotalSales = async (date: any, shopId: any) => {
         where: {
             created_at: {
                 gte: new Date(date.from_created_date),
-                lte: new Date(date.to_created_date),
+                lt: new Date(date.to_created_date),
             },
             shop_id: shopId,
         },

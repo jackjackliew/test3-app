@@ -22,7 +22,7 @@ const { HOST_SCHEME } = process.env;
 let shop: any;
 let accessToken: any;
 let storedShopId: any;
-let shopName: any;
+// let shopName: any;s
 
 interface MyResponseBodyType {
   data: any
@@ -46,8 +46,9 @@ const ACTIVE_SHOPIFY_SHOPS: { [key: string]: string | undefined } = {};
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get("/", async (req, res) => {
+  console.log("this is active shopify scopes : " + ACTIVE_SHOPIFY_SHOPS[shop]);
   //  This shop hasn't been seen yet, go through OAuth to create a session
-  if (ACTIVE_SHOPIFY_SHOPS[shopName] === undefined) {
+  if (ACTIVE_SHOPIFY_SHOPS[shop] === undefined) {
     res.send(
       `<html>
         <body>
@@ -72,6 +73,93 @@ app.get("/", async (req, res) => {
     );
     res.end();
   }
+});
+
+app.get("/shopify/success", async (req, res) => {
+
+  const client = new Shopify.Clients.Graphql(shop, accessToken);
+
+  try {
+    const shopId: any = await client.query<MyResponseBodyType>({
+      data: {
+        query: getShopId()
+      },
+    });
+
+    console.log(shopId.body.data.shop);
+    storedShopId = shopId.body.data.shop.id;
+    await insertShop(shopId.body.data.shop, accessToken);
+
+    res.send(
+      `<html>
+        <body>
+          <p>You have successfully authenticated.</p>
+          <p>Please enter the date of orders needed to be retrived.</p>
+          <form action="/shopify/getorders" method="post">
+            <label for="from_created_date">Start Date:</label>
+            <input type="date" id="from_created_date" name="from_created_date">
+            <label for="to_created_date">End Date:</label>
+            <input type="date" id="to_created_date" name="to_created_date">
+            <button type="submit">Submit</button>
+          </form>
+          <p>If enter without date, it will retrieve orders for past 40 days by default.</p>
+        </body>
+      </html>`
+    );
+  } catch(err) {
+    console.log("An error has occured: " + err);
+    res.send(
+      `<html>
+        <body>
+          <p>Invalid shop domain or access token. Kindly insert correct details.</p>
+          <form action="/shopify" method="post">
+            <label for="shop_name">Enter your shop name with (.myshopify.com) :</label>
+            <input type="text" id="shop_name" name="shop_name" required>
+            <label for="shop_access_token">Enter your access token:</label>
+            <input type="text" id="shop_access_token" name="shop_access_token" required>
+            <button type="submit">Submit</button>
+          </form>
+        </body>
+      </html>`
+    );
+  }
+});
+
+app.get('/login', async (req, res) => {
+  shop = req.query.shop_name;
+
+  let authRoute = await Shopify.Auth.beginAuth(
+    req,
+    res,
+    shop,
+    '/auth/callback',
+    false,
+  );
+  console.log(authRoute);
+  return res.redirect(authRoute);
+});
+
+app.get('/auth/callback', async (req, res) => {
+
+  try {
+    const session = await Shopify.Auth.validateAuthCallback(
+      req,
+      res,
+      req.query as unknown as AuthQuery,
+    ); // req.query must be cast to unkown and then AuthQuery in order to be accepted
+
+    console.log(session);
+    ACTIVE_SHOPIFY_SHOPS[shop] = session.scope;
+    accessToken = session.accessToken;
+    console.log("this is the shop name : " + shop);
+    console.log("this is the access token : " + accessToken);
+    // console.log(session.accessToken);
+    console.log(session.scope);
+  } catch (error) {
+    console.error(error); // in practice these should be handled more gracefully
+  }
+
+  return res.redirect(`/shopify/success?host=${req.query.host}&shop=${req.query.shop}`)
 });
 
 app.get("/home", async (req, res) => {
@@ -153,12 +241,21 @@ app.post("/shopify/getorders", async (req, res) => {
   console.log(req.body.to_created_date);
 
   if(req.body.from_created_date !== '' || req.body.to_created_date !== '') {
+    if(req.body.to_created_date !== '') {
+      let addOneDay = new Date(req.body.to_created_date);
+      addOneDay.setDate(addOneDay.getDate() + 1);
+      const toDay = addOneDay.getDate();
+      const toMonth = addOneDay.getMonth() + 1;
+      const toYear = addOneDay.getFullYear();
+      req.body.to_created_date = toYear + "-" + toMonth + "-" + ("0" + toDay).slice(-2);
+    }
     console.log("shopify get orders" + shop);
     console.log("shopify get orders" + accessToken);
     const client = new Shopify.Clients.Graphql(shop, accessToken);
 
     let cursor = null;
-
+    console.log("inside if else from : " + req.body.from_created_date);
+    console.log("inside if else to : " + req.body.to_created_date);
     try {
       while (true) {
         const orders: any = await client.query<MyResponseBodyType>({
@@ -213,7 +310,9 @@ app.post("/shopify/getorders", async (req, res) => {
 
     let cursor = null;
     const now = new Date(Date.now());
+    now.setDate(now.getDate() + 1);
     const last = new Date(Date.now() - (40 * 24 * 60 * 60 * 1000)); //past 40 days
+    console.log("now : " + now);
     const fromDay = last.getDate();
     const fromMonth = last.getMonth() + 1;
     const fromYear = last.getFullYear();
@@ -275,7 +374,6 @@ app.post("/shopify/getorders", async (req, res) => {
   }
 });
 
-
 cron.schedule('*/5 * * * *', async () => {
   if(shop !== undefined && accessToken !== undefined) {
     const client = new Shopify.Clients.Graphql(shop, accessToken);
@@ -291,6 +389,7 @@ cron.schedule('*/5 * * * *', async () => {
       if(storedShopId !== undefined) {
         let cursor = null;
         const now = new Date(Date.now());
+        now.setDate(now.getDate() + 1);
         const last = new Date(Date.now() - (40 * 24 * 60 * 60 * 1000)); //past 40 days
         const fromDay = last.getDate();
         const fromMonth = last.getMonth() + 1;
@@ -361,6 +460,7 @@ app.post("/shopify/getdailytotal", async (req, res) => {
     }
   } else {
     const now = new Date(Date.now());
+    now.setDate(now.getDate() + 1);
     const last = new Date(Date.now() - (40 * 24 * 60 * 60 * 1000)); //past 40 days
     const fromDay = last.getDate();
     const fromMonth = last.getMonth() + 1;
@@ -381,40 +481,6 @@ app.post("/shopify/getdailytotal", async (req, res) => {
       console.log(getDailyTotalRefundsResults);
     }
   }
-});
-
-app.get('/login', async (req, res) => {
-  shopName = req.query.shop_name;
-
-  let authRoute = await Shopify.Auth.beginAuth(
-    req,
-    res,
-    shopName,
-    '/auth/callback',
-    false,
-  );
-  console.log(authRoute);
-  return res.redirect(authRoute);
-});
-
-app.get('/auth/callback', async (req, res) => {
-
-  try {
-    const session = await Shopify.Auth.validateAuthCallback(
-      req,
-      res,
-      req.query as unknown as AuthQuery,
-    ); // req.query must be cast to unkown and then AuthQuery in order to be accepted
-
-    console.log(session);
-    ACTIVE_SHOPIFY_SHOPS[shopName] = session.scope;
-    console.log(session.accessToken);
-    console.log(session.scope);
-  } catch (error) {
-    console.error(error); // in practice these should be handled more gracefully
-  }
-
-  return res.redirect(`/?host=${req.query.host}&shop=${req.query.shop}`)
 });
 
 app.listen(3000, () => {
