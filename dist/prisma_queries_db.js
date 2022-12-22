@@ -12,25 +12,26 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getDailyTotalRefunds = exports.insertDailyTotalRefunds = exports.getTotalRefundsTransaction = exports.getDailyTotalSales = exports.insertDailyTotalSales = exports.getTotalSalesTransaction = exports.insertTransaction = exports.getOrderById = exports.insertOrder = exports.insertShop = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
-const insertShop = (shop, accessToken) => __awaiter(void 0, void 0, void 0, function* () {
-    const insertShop = yield prisma.shop.upsert({
+const insertShop = (shopify, accessToken, business) => __awaiter(void 0, void 0, void 0, function* () {
+    const insertShop = yield prisma.shopify.upsert({
         where: {
-            shop_id: shop.id
+            shopify_id: shopify.id,
         },
         update: {
-            shop_name: shop.name,
+            shopify_name: shopify.name,
             access_token: accessToken,
         },
         create: {
-            shop_id: shop.id,
-            shop_name: shop.name,
-            shop_url: shop.url,
-            access_token: accessToken
+            shopify_id: shopify.id,
+            shopify_name: shopify.name,
+            shopify_url: shopify.url,
+            access_token: accessToken,
+            business_id: business,
         },
     });
 });
 exports.insertShop = insertShop;
-const insertOrder = (order, shopId) => __awaiter(void 0, void 0, void 0, function* () {
+const insertOrder = (order, shopifyId) => __awaiter(void 0, void 0, void 0, function* () {
     const insertOrder = yield prisma.order.upsert({
         where: {
             reference_order_id: order.id,
@@ -54,28 +55,28 @@ const insertOrder = (order, shopId) => __awaiter(void 0, void 0, void 0, functio
             totaldiscountsset_shopmoney_amount: parseInt(order.totalDiscountsSet.shopMoney.amount),
             totaldiscountsset_shopmoney_currencycode: order.totalDiscountsSet.shopMoney.currencyCode,
             reference_order_id: order.id,
-            shop_id: shopId,
+            shopify_id: shopifyId,
         },
     });
     if (insertOrder) {
         console.log('All orders have been inserted');
     }
     else {
-        console.log("Insert error");
+        console.log('Insert error');
     }
 });
 exports.insertOrder = insertOrder;
 const getOrderById = (reference_order_id) => __awaiter(void 0, void 0, void 0, function* () {
     const getOrderById = yield prisma.order.findUnique({
         where: {
-            reference_order_id
-        }
+            reference_order_id,
+        },
     });
     if (getOrderById) {
         return getOrderById;
     }
     else {
-        console.log("error getting data with id");
+        console.log('error getting data with id');
     }
 });
 exports.getOrderById = getOrderById;
@@ -101,11 +102,11 @@ const insertTransaction = (order, transaction) => __awaiter(void 0, void 0, void
         console.log('All transactions have been inserted');
     }
     else {
-        console.log("Insert error");
+        console.log('Insert error');
     }
 });
 exports.insertTransaction = insertTransaction;
-const getTotalSalesTransaction = (transaction, shopId) => __awaiter(void 0, void 0, void 0, function* () {
+const getTotalSalesTransaction = (transaction, shopifyId) => __awaiter(void 0, void 0, void 0, function* () {
     let date = {};
     console.log(transaction.from_created_date);
     console.log(transaction.to_created_date);
@@ -117,10 +118,10 @@ const getTotalSalesTransaction = (transaction, shopId) => __awaiter(void 0, void
                 lt: new Date(transaction.to_created_date),
             },
             transaction_kind: {
-                contains: 'SALE'
+                contains: 'SALE',
             },
             transaction_status: {
-                contains: 'SUCCESS'
+                contains: 'SUCCESS',
             },
         },
         select: {
@@ -129,55 +130,59 @@ const getTotalSalesTransaction = (transaction, shopId) => __awaiter(void 0, void
             transaction_presentment_amount: true,
         },
         orderBy: {
-            transaction_created_at: 'asc'
+            transaction_created_at: 'asc',
         },
     });
     for (let i = 0; i < getSales.length; i++) {
         console.log(getSales[i]);
-        console.log("this is the order id for the transaction: " + getSales[i].reference_order_id);
+        console.log('this is the order id for the transaction: ' +
+            getSales[i].reference_order_id);
         let order = yield (0, exports.getOrderById)(getSales[i].reference_order_id);
-        if ((order === null || order === void 0 ? void 0 : order.shop_id) === shopId) {
+        if ((order === null || order === void 0 ? void 0 : order.shopify_id) === shopifyId) {
             salesDate = getSales[i].transaction_created_at;
-            console.log("salesDate: " + salesDate);
+            console.log('salesDate: ' + salesDate);
             if (salesDate) {
                 const day = salesDate.getDate();
                 const month = salesDate.getMonth() + 1;
                 const year = salesDate.getFullYear();
-                let convertedSalesDate = year + "-" + month + "-" + ("0" + day).slice(-2);
+                let convertedSalesDate = year + '-' + month + '-' + ('0' + day).slice(-2);
                 if (Object.keys(date).length === 0) {
-                    console.log("if the date object length is 0: " + getSales[i].transaction_presentment_amount);
-                    console.log("first key: " + convertedSalesDate);
+                    console.log('if the date object length is 0: ' +
+                        getSales[i].transaction_presentment_amount);
+                    console.log('first key: ' + convertedSalesDate);
                     date[convertedSalesDate] = getSales[i].transaction_presentment_amount;
                 }
                 else if (Object.keys(date).length !== 0) {
-                    console.log("object key: " + date.hasOwnProperty(convertedSalesDate));
-                    console.log("after first key: " + convertedSalesDate);
+                    console.log('object key: ' + date.hasOwnProperty(convertedSalesDate));
+                    console.log('after first key: ' + convertedSalesDate);
                     if (date.hasOwnProperty(convertedSalesDate)) {
-                        date[convertedSalesDate] += getSales[i].transaction_presentment_amount;
+                        date[convertedSalesDate] +=
+                            getSales[i].transaction_presentment_amount;
                     }
                     else {
-                        date[convertedSalesDate] = getSales[i].transaction_presentment_amount;
+                        date[convertedSalesDate] =
+                            getSales[i].transaction_presentment_amount;
                     }
                 }
             }
         }
         else {
-            console.log("incorrect shop id");
+            console.log('incorrect shop id');
         }
     }
     console.log(date);
     for (const key in date) {
-        (0, exports.insertDailyTotalSales)(key, date[key], shopId);
+        (0, exports.insertDailyTotalSales)(key, date[key], shopifyId);
     }
     return getSales;
 });
 exports.getTotalSalesTransaction = getTotalSalesTransaction;
-const insertDailyTotalSales = (date, totalSales, shopId) => __awaiter(void 0, void 0, void 0, function* () {
+const insertDailyTotalSales = (date, totalSales, shopifyId) => __awaiter(void 0, void 0, void 0, function* () {
     const insertTotalSales = yield prisma.daily_insight.upsert({
         where: {
-            created_at_shop_id: {
+            created_at_shopify_id: {
                 created_at: new Date(date),
-                shop_id: shopId,
+                shopify_id: shopifyId,
             },
         },
         update: {
@@ -186,32 +191,32 @@ const insertDailyTotalSales = (date, totalSales, shopId) => __awaiter(void 0, vo
         create: {
             created_at: new Date(date),
             total_sales_amount: totalSales,
-            shop_id: shopId,
+            shopify_id: shopifyId,
         },
     });
     if (insertTotalSales) {
         console.log('All total sales have been inserted');
     }
     else {
-        console.log("Insert error");
+        console.log('Insert error');
     }
 });
 exports.insertDailyTotalSales = insertDailyTotalSales;
-const getDailyTotalSales = (date, shopId) => __awaiter(void 0, void 0, void 0, function* () {
+const getDailyTotalSales = (date, shopifyId) => __awaiter(void 0, void 0, void 0, function* () {
     const getTotalSales = yield prisma.daily_insight.findMany({
         where: {
             created_at: {
                 gte: new Date(date.from_created_date),
                 lt: new Date(date.to_created_date),
             },
-            shop_id: shopId,
+            shopify_id: shopifyId,
         },
         select: {
             created_at: true,
             total_sales_amount: true,
         },
         orderBy: {
-            created_at: 'asc'
+            created_at: 'asc',
         },
     });
     return getTotalSales;
@@ -229,10 +234,10 @@ const getTotalRefundsTransaction = (transaction, shopId) => __awaiter(void 0, vo
                 lte: new Date(transaction.to_created_date),
             },
             transaction_kind: {
-                contains: 'REFUND'
+                contains: 'REFUND',
             },
             transaction_status: {
-                contains: 'SUCCESS'
+                contains: 'SUCCESS',
             },
         },
         select: {
@@ -241,40 +246,45 @@ const getTotalRefundsTransaction = (transaction, shopId) => __awaiter(void 0, vo
             transaction_presentment_amount: true,
         },
         orderBy: {
-            transaction_created_at: 'asc'
+            transaction_created_at: 'asc',
         },
     });
     for (let i = 0; i < getRefunds.length; i++) {
         console.log(getRefunds[i]);
-        console.log("this is the order id for the transaction: " + getRefunds[i].reference_order_id);
+        console.log('this is the order id for the transaction: ' +
+            getRefunds[i].reference_order_id);
         let order = yield (0, exports.getOrderById)(getRefunds[i].reference_order_id);
-        if ((order === null || order === void 0 ? void 0 : order.shop_id) === shopId) {
+        if ((order === null || order === void 0 ? void 0 : order.shopify_id) === shopId) {
             refundsDate = getRefunds[i].transaction_created_at;
-            console.log("salesDate: " + refundsDate);
+            console.log('salesDate: ' + refundsDate);
             if (refundsDate) {
                 const day = refundsDate.getDate();
                 const month = refundsDate.getMonth() + 1;
                 const year = refundsDate.getFullYear();
-                let convertedRefundsDate = year + "-" + month + "-" + ("0" + day).slice(-2);
+                let convertedRefundsDate = year + '-' + month + '-' + ('0' + day).slice(-2);
                 if (Object.keys(date).length === 0) {
-                    console.log("if the date object length is 0: " + getRefunds[i].transaction_presentment_amount);
-                    console.log("first key: " + convertedRefundsDate);
-                    date[convertedRefundsDate] = getRefunds[i].transaction_presentment_amount;
+                    console.log('if the date object length is 0: ' +
+                        getRefunds[i].transaction_presentment_amount);
+                    console.log('first key: ' + convertedRefundsDate);
+                    date[convertedRefundsDate] =
+                        getRefunds[i].transaction_presentment_amount;
                 }
                 else if (Object.keys(date).length !== 0) {
-                    console.log("object key: " + date.hasOwnProperty(convertedRefundsDate));
-                    console.log("after first key: " + convertedRefundsDate);
+                    console.log('object key: ' + date.hasOwnProperty(convertedRefundsDate));
+                    console.log('after first key: ' + convertedRefundsDate);
                     if (date.hasOwnProperty(convertedRefundsDate)) {
-                        date[convertedRefundsDate] += getRefunds[i].transaction_presentment_amount;
+                        date[convertedRefundsDate] +=
+                            getRefunds[i].transaction_presentment_amount;
                     }
                     else {
-                        date[convertedRefundsDate] = getRefunds[i].transaction_presentment_amount;
+                        date[convertedRefundsDate] =
+                            getRefunds[i].transaction_presentment_amount;
                     }
                 }
             }
         }
         else {
-            console.log("incorrect shop id");
+            console.log('incorrect shop id');
         }
     }
     console.log(date);
@@ -284,12 +294,12 @@ const getTotalRefundsTransaction = (transaction, shopId) => __awaiter(void 0, vo
     return getRefunds;
 });
 exports.getTotalRefundsTransaction = getTotalRefundsTransaction;
-const insertDailyTotalRefunds = (date, totalRefunds, shopId) => __awaiter(void 0, void 0, void 0, function* () {
+const insertDailyTotalRefunds = (date, totalRefunds, shopifyId) => __awaiter(void 0, void 0, void 0, function* () {
     const insertTotalRefunds = yield prisma.daily_insight.upsert({
         where: {
-            created_at_shop_id: {
+            created_at_shopify_id: {
                 created_at: new Date(date),
-                shop_id: shopId,
+                shopify_id: shopifyId,
             },
         },
         update: {
@@ -298,32 +308,32 @@ const insertDailyTotalRefunds = (date, totalRefunds, shopId) => __awaiter(void 0
         create: {
             created_at: new Date(date),
             total_refunds_amount: totalRefunds,
-            shop_id: shopId,
+            shopify_id: shopifyId,
         },
     });
     if (insertTotalRefunds) {
         console.log('All total refunds have been inserted');
     }
     else {
-        console.log("Insert error");
+        console.log('Insert error');
     }
 });
 exports.insertDailyTotalRefunds = insertDailyTotalRefunds;
-const getDailyTotalRefunds = (date, shopId) => __awaiter(void 0, void 0, void 0, function* () {
+const getDailyTotalRefunds = (date, shopifyId) => __awaiter(void 0, void 0, void 0, function* () {
     const getTotalRefunds = yield prisma.daily_insight.findMany({
         where: {
             created_at: {
                 gte: new Date(date.from_created_date),
                 lte: new Date(date.to_created_date),
             },
-            shop_id: shopId,
+            shopify_id: shopifyId,
         },
         select: {
             created_at: true,
             total_refunds_amount: true,
         },
         orderBy: {
-            created_at: 'asc'
+            created_at: 'asc',
         },
     });
     return getTotalRefunds;

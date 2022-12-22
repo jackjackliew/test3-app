@@ -45,21 +45,29 @@ const prisma_queries_db_1 = require("./prisma_queries_db");
 require('dotenv').config();
 const app = (0, express_1.default)();
 const prisma = new client_1.PrismaClient();
-const API_KEY = process.env.API_KEY ? process.env.API_KEY : "";
-const API_SECRET_KEY = process.env.API_SECRET_KEY ? process.env.API_SECRET_KEY : "";
-const SCOPES = process.env.SCOPES ? process.env.SCOPES : "";
-const SHOP = process.env.SHOP ? process.env.SHOP : "";
-const SHOP2 = process.env.SHOP2 ? process.env.SHOP2 : "";
-const HOST = process.env.HOST ? process.env.HOST : "";
+const API_KEY = process.env.API_KEY ? process.env.API_KEY : '';
+const API_SECRET_KEY = process.env.API_SECRET_KEY
+    ? process.env.API_SECRET_KEY
+    : '';
+const SCOPES = process.env.SCOPES ? process.env.SCOPES : '';
+const SHOP = process.env.SHOP ? process.env.SHOP : '';
+const SHOP2 = process.env.SHOP2 ? process.env.SHOP2 : '';
+const HOST = process.env.HOST ? process.env.HOST : '';
 const { HOST_SCHEME } = process.env;
 let shop;
 let accessToken;
 let storedShopId;
+class Business {
+    constructor() {
+        const id = 12312321;
+    }
+}
+let business = '123456';
 shopify_api_1.default.Context.initialize({
     API_KEY,
     API_SECRET_KEY,
     SCOPES: [SCOPES],
-    HOST_NAME: HOST.replace(/https?:\/\//, ""),
+    HOST_NAME: HOST.replace(/https?:\/\//, ''),
     HOST_SCHEME,
     IS_EMBEDDED_APP: false,
     API_VERSION: shopify_api_1.ApiVersion.October22, // all supported versions are available, as well as "unstable" and "unversioned"
@@ -69,8 +77,8 @@ shopify_api_1.default.Context.initialize({
 const ACTIVE_SHOPIFY_SHOPS = {};
 // the rest of the example code goes here
 app.use(body_parser_1.default.urlencoded({ extended: true }));
-app.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("this is active shopify scopes : " + ACTIVE_SHOPIFY_SHOPS[shop]);
+app.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log('this is active shopify scopes : ' + ACTIVE_SHOPIFY_SHOPS[shop]);
     //  This shop hasn't been seen yet, go through OAuth to create a session
     if (ACTIVE_SHOPIFY_SHOPS[shop] === undefined) {
         res.send(`<html>
@@ -95,17 +103,17 @@ app.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.end();
     }
 }));
-app.get("/shopify/success", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.get('/shopify/success', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const client = new shopify_api_1.default.Clients.Graphql(shop, accessToken);
     try {
         const shopId = yield client.query({
             data: {
-                query: getShopId()
+                query: getShopId(),
             },
         });
         console.log(shopId.body.data.shop);
         storedShopId = shopId.body.data.shop.id;
-        yield (0, prisma_queries_db_1.insertShop)(shopId.body.data.shop, accessToken);
+        yield (0, prisma_queries_db_1.insertShop)(shopId.body.data.shop, accessToken, business);
         res.send(`<html>
         <body>
           <p>You have successfully authenticated.</p>
@@ -122,7 +130,7 @@ app.get("/shopify/success", (req, res) => __awaiter(void 0, void 0, void 0, func
       </html>`);
     }
     catch (err) {
-        console.log("An error has occured: " + err);
+        console.log('An error has occured: ' + err);
         res.send(`<html>
         <body>
           <p>Invalid shop domain or access token. Kindly insert correct details.</p>
@@ -149,8 +157,8 @@ app.get('/auth/callback', (req, res) => __awaiter(void 0, void 0, void 0, functi
         console.log(session);
         ACTIVE_SHOPIFY_SHOPS[shop] = session.scope;
         accessToken = session.accessToken;
-        console.log("this is the shop name : " + shop);
-        console.log("this is the access token : " + accessToken);
+        console.log('this is the shop name : ' + shop);
+        console.log('this is the access token : ' + accessToken);
         // console.log(session.accessToken);
         console.log(session.scope);
     }
@@ -159,7 +167,7 @@ app.get('/auth/callback', (req, res) => __awaiter(void 0, void 0, void 0, functi
     }
     return res.redirect(`/shopify/success?host=${req.query.host}&shop=${req.query.shop}`);
 }));
-app.get("/home", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.get('/home', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     res.send(`<html>
         <body>
           <p>Welcome! kindly insert your shop name and access token</p>
@@ -174,20 +182,21 @@ app.get("/home", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
       </html>`);
     res.end();
 }));
-app.post("/shopify", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (req.body.shop_name !== undefined && req.body.shop_access_token !== undefined) {
+app.post('/shopify', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    if (req.body.shop_name !== undefined &&
+        req.body.shop_access_token !== undefined) {
         shop = req.body.shop_name;
         accessToken = req.body.shop_access_token;
         const client = new shopify_api_1.default.Clients.Graphql(shop, accessToken);
         try {
             const shopId = yield client.query({
                 data: {
-                    query: getShopId()
+                    query: getShopId(),
                 },
             });
             console.log(shopId.body.data.shop);
             storedShopId = shopId.body.data.shop.id;
-            yield (0, prisma_queries_db_1.insertShop)(shopId.body.data.shop, accessToken);
+            yield (0, prisma_queries_db_1.insertShop)(shopId.body.data.shop, accessToken, business);
             res.send(`<html>
           <body>
             <p>You have successfully authenticated.</p>
@@ -204,7 +213,7 @@ app.post("/shopify", (req, res) => __awaiter(void 0, void 0, void 0, function* (
         </html>`);
         }
         catch (err) {
-            console.log("An error has occured: " + err);
+            console.log('An error has occured: ' + err);
             res.send(`<html>
           <body>
             <p>Invalid shop domain or access token. Kindly insert correct details.</p>
@@ -220,9 +229,9 @@ app.post("/shopify", (req, res) => __awaiter(void 0, void 0, void 0, function* (
         }
     }
 }));
-app.post("/shopify/getorders", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.post('/shopify/getorders', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log(storedShopId);
-    console.log(typeof (req.body.from_created_date));
+    console.log(typeof req.body.from_created_date);
     console.log(req.body.from_created_date);
     console.log(req.body.to_created_date);
     if (req.body.from_created_date !== '' || req.body.to_created_date !== '') {
@@ -232,21 +241,22 @@ app.post("/shopify/getorders", (req, res) => __awaiter(void 0, void 0, void 0, f
             const toDay = addOneDay.getDate();
             const toMonth = addOneDay.getMonth() + 1;
             const toYear = addOneDay.getFullYear();
-            req.body.to_created_date = toYear + "-" + toMonth + "-" + ("0" + toDay).slice(-2);
+            req.body.to_created_date =
+                toYear + '-' + toMonth + '-' + ('0' + toDay).slice(-2);
         }
-        console.log("shopify get orders" + shop);
-        console.log("shopify get orders" + accessToken);
+        console.log('shopify get orders' + shop);
+        console.log('shopify get orders' + accessToken);
         const client = new shopify_api_1.default.Clients.Graphql(shop, accessToken);
         let cursor = null;
-        console.log("inside if else from : " + req.body.from_created_date);
-        console.log("inside if else to : " + req.body.to_created_date);
+        console.log('inside if else from : ' + req.body.from_created_date);
+        console.log('inside if else to : ' + req.body.to_created_date);
         try {
             while (true) {
                 const orders = yield client.query({
                     data: {
                         query: getOrdersWithDate(req.body),
                         variables: {
-                            cursor: cursor
+                            cursor: cursor,
                         },
                     },
                 });
@@ -261,12 +271,10 @@ app.post("/shopify/getorders", (req, res) => __awaiter(void 0, void 0, void 0, f
                     }
                 }
                 if (nextPage === false) {
-                    console.log("All data have been retrieved, no more next page");
+                    console.log('All data have been retrieved, no more next page');
                     break;
                 }
-                ;
             }
-            ;
             res.send(`<html>
           <body>
             <p>Your orders data have been successfully retrieved from your shop.</p>
@@ -282,26 +290,28 @@ app.post("/shopify/getorders", (req, res) => __awaiter(void 0, void 0, void 0, f
         </html>`);
         }
         catch (err) {
-            console.log("An error has occured when retrieving data from shop: " + err);
+            console.log('An error has occured when retrieving data from shop: ' + err);
         }
     }
     else {
-        console.log("shopify get orders" + shop);
-        console.log("shopify get orders" + accessToken);
+        console.log('shopify get orders' + shop);
+        console.log('shopify get orders' + accessToken);
         const client = new shopify_api_1.default.Clients.Graphql(shop, accessToken);
         let cursor = null;
         const now = new Date(Date.now());
         now.setDate(now.getDate() + 1);
-        const last = new Date(Date.now() - (40 * 24 * 60 * 60 * 1000)); //past 40 days
-        console.log("now : " + now);
+        const last = new Date(Date.now() - 40 * 24 * 60 * 60 * 1000); //past 40 days
+        console.log('now : ' + now);
         const fromDay = last.getDate();
         const fromMonth = last.getMonth() + 1;
         const fromYear = last.getFullYear();
         const toDay = now.getDate();
         const toMonth = now.getMonth() + 1;
         const toYear = now.getFullYear();
-        req.body.from_created_date = fromYear + "-" + fromMonth + "-" + ("0" + fromDay).slice(-2);
-        req.body.to_created_date = toYear + "-" + toMonth + "-" + ("0" + toDay).slice(-2);
+        req.body.from_created_date =
+            fromYear + '-' + fromMonth + '-' + ('0' + fromDay).slice(-2);
+        req.body.to_created_date =
+            toYear + '-' + toMonth + '-' + ('0' + toDay).slice(-2);
         console.log(req.body.from_created_date);
         console.log(req.body.to_created_date);
         try {
@@ -310,7 +320,7 @@ app.post("/shopify/getorders", (req, res) => __awaiter(void 0, void 0, void 0, f
                     data: {
                         query: getOrdersWithDate(req.body),
                         variables: {
-                            cursor: cursor
+                            cursor: cursor,
                         },
                     },
                 });
@@ -324,12 +334,10 @@ app.post("/shopify/getorders", (req, res) => __awaiter(void 0, void 0, void 0, f
                     }
                 }
                 if (nextPage === false) {
-                    console.log("All data have been retrieved, no more next page");
+                    console.log('All data have been retrieved, no more next page');
                     break;
                 }
-                ;
             }
-            ;
             res.send(`<html>
           <body>
             <p>Your orders data have been successfully retrieved from your shop.</p>
@@ -345,7 +353,7 @@ app.post("/shopify/getorders", (req, res) => __awaiter(void 0, void 0, void 0, f
         </html>`);
         }
         catch (err) {
-            console.log("An error has occured when retrieving data from shop: " + err);
+            console.log('An error has occured when retrieving data from shop: ' + err);
         }
     }
 }));
@@ -355,7 +363,7 @@ node_cron_1.default.schedule('*/5 * * * *', () => __awaiter(void 0, void 0, void
         try {
             const shopId = yield client.query({
                 data: {
-                    query: getShopId()
+                    query: getShopId(),
                 },
             });
             storedShopId = shopId.body.data.shop.id;
@@ -363,7 +371,7 @@ node_cron_1.default.schedule('*/5 * * * *', () => __awaiter(void 0, void 0, void
                 let cursor = null;
                 const now = new Date(Date.now());
                 now.setDate(now.getDate() + 1);
-                const last = new Date(Date.now() - (40 * 24 * 60 * 60 * 1000)); //past 40 days
+                const last = new Date(Date.now() - 40 * 24 * 60 * 60 * 1000); //past 40 days
                 const fromDay = last.getDate();
                 const fromMonth = last.getMonth() + 1;
                 const fromYear = last.getFullYear();
@@ -371,8 +379,8 @@ node_cron_1.default.schedule('*/5 * * * *', () => __awaiter(void 0, void 0, void
                 const toMonth = now.getMonth() + 1;
                 const toYear = now.getFullYear();
                 let scheduleTime = {
-                    from_created_date: fromYear + "-" + fromMonth + "-" + ("0" + fromDay).slice(-2),
-                    to_created_date: toYear + "-" + toMonth + "-" + ("0" + toDay).slice(-2),
+                    from_created_date: fromYear + '-' + fromMonth + '-' + ('0' + fromDay).slice(-2),
+                    to_created_date: toYear + '-' + toMonth + '-' + ('0' + toDay).slice(-2),
                 };
                 console.log(scheduleTime.from_created_date);
                 console.log(scheduleTime.to_created_date);
@@ -382,7 +390,7 @@ node_cron_1.default.schedule('*/5 * * * *', () => __awaiter(void 0, void 0, void
                             data: {
                                 query: getOrdersWithDate(scheduleTime),
                                 variables: {
-                                    cursor: cursor
+                                    cursor: cursor,
                                 },
                             },
                         });
@@ -396,31 +404,29 @@ node_cron_1.default.schedule('*/5 * * * *', () => __awaiter(void 0, void 0, void
                             }
                         }
                         if (nextPage === false) {
-                            console.log("All data have been retrieved, no more next page");
+                            console.log('All data have been retrieved, no more next page');
                             break;
                         }
-                        ;
                     }
-                    ;
                 }
                 catch (err) {
-                    console.log("An error has occured when retrieving data from shop: " + err);
+                    console.log('An error has occured when retrieving data from shop: ' + err);
                 }
             }
         }
         catch (err) {
-            console.log("An error has occured: " + err);
+            console.log('An error has occured: ' + err);
         }
     }
     else {
         console.log(shop);
         console.log(accessToken);
-        console.log("shop or access token invalid while running schedule update");
+        console.log('shop or access token invalid while running schedule update');
     }
-    console.log("---------------------");
-    console.log("running a task every 5 minutes");
+    console.log('---------------------');
+    console.log('running a task every 5 minutes');
 }));
-app.post("/shopify/getdailytotal", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.post('/shopify/getdailytotal', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (req.body.from_created_date !== '' || req.body.to_created_date !== '') {
         const getTotalSalesTransactionResults = yield (0, prisma_queries_db_1.getTotalSalesTransaction)(req.body, storedShopId);
         const getTotalRefundsTransactionResults = yield (0, prisma_queries_db_1.getTotalRefundsTransaction)(req.body, storedShopId);
@@ -434,17 +440,19 @@ app.post("/shopify/getdailytotal", (req, res) => __awaiter(void 0, void 0, void 
     else {
         const now = new Date(Date.now());
         now.setDate(now.getDate() + 1);
-        const last = new Date(Date.now() - (40 * 24 * 60 * 60 * 1000)); //past 40 days
+        const last = new Date(Date.now() - 40 * 24 * 60 * 60 * 1000); //past 40 days
         const fromDay = last.getDate();
         const fromMonth = last.getMonth() + 1;
         const fromYear = last.getFullYear();
         const toDay = now.getDate();
         const toMonth = now.getMonth() + 1;
         const toYear = now.getFullYear();
-        req.body.from_created_date = fromYear + "-" + fromMonth + "-" + ("0" + fromDay).slice(-2);
-        req.body.to_created_date = toYear + "-" + toMonth + "-" + ("0" + toDay).slice(-2);
-        console.log("to date: " + req.body.to_created_date);
-        console.log("from date: " + req.body.from_created_date);
+        req.body.from_created_date =
+            fromYear + '-' + fromMonth + '-' + ('0' + fromDay).slice(-2);
+        req.body.to_created_date =
+            toYear + '-' + toMonth + '-' + ('0' + toDay).slice(-2);
+        console.log('to date: ' + req.body.to_created_date);
+        console.log('from date: ' + req.body.from_created_date);
         const getTotalSalesTransactionResults = yield (0, prisma_queries_db_1.getTotalSalesTransaction)(req.body, storedShopId);
         const getTotalRefundsTransactionResults = yield (0, prisma_queries_db_1.getTotalRefundsTransaction)(req.body, storedShopId);
         if (getTotalSalesTransactionResults && getTotalRefundsTransactionResults) {
