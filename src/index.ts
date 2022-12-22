@@ -36,12 +36,13 @@ const { HOST_SCHEME } = process.env;
 let shop: any;
 let accessToken: any;
 let storedShopId: any;
-let business: any;
 // let shopName: any;
 
 interface MyResponseBodyType {
   data: any;
 }
+
+let business = '123456';
 
 Shopify.Context.initialize({
   API_KEY,
