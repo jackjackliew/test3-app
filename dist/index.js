@@ -57,12 +57,7 @@ const { HOST_SCHEME } = process.env;
 let shop;
 let accessToken;
 let storedShopId;
-class Business {
-    constructor() {
-        const id = 12312321;
-    }
-}
-let business = '123456';
+let business = '12345612345612345612345612345612';
 shopify_api_1.default.Context.initialize({
     API_KEY,
     API_SECRET_KEY,

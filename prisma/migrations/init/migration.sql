@@ -45,14 +45,14 @@ CREATE TABLE "Facebook" (
     "website_purchase_conversion_value" DECIMAL,
     "offline_purchase_conversion_value" DECIMAL,
     "purchase_roas" DECIMAL,
-    "business_id" VARCHAR NOT NULL,
+    "business_id" UUID NOT NULL,
 
     CONSTRAINT "Facebook_pkey" PRIMARY KEY ("facebook_id")
 );
 
 -- CreateTable
 CREATE TABLE "Business" (
-    "business_id" VARCHAR NOT NULL,
+    "business_id" UUID NOT NULL,
     "business_name" TEXT,
     "admin_id" UUID,
     "fb_id" TEXT,
@@ -67,7 +67,7 @@ CREATE TABLE "Shopify" (
     "shopify_name" VARCHAR,
     "shopify_url" VARCHAR NOT NULL,
     "access_token" VARCHAR NOT NULL,
-    "business_id" VARCHAR NOT NULL,
+    "business_id" UUID NOT NULL,
 
     CONSTRAINT "Shopify_pkey" PRIMARY KEY ("shopify_id")
 );
@@ -121,12 +121,15 @@ CREATE TABLE "_RoleToUser" (
 
 -- CreateTable
 CREATE TABLE "_BusinessToUser" (
-    "A" VARCHAR NOT NULL,
+    "A" UUID NOT NULL,
     "B" UUID NOT NULL
 );
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Business_business_id_key" ON "Business"("business_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Shopify_shopify_id_key" ON "Shopify"("shopify_id");
