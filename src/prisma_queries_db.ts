@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import Shopify from '@shopify/shopify-api';
 
 const prisma = new PrismaClient();
 
@@ -21,7 +20,7 @@ export const insertShop = async (
       shopify_name: shopify.name,
       shopify_url: shopify.url,
       access_token: accessToken,
-      business_id: business.id,
+      business_id: business,
     },
   });
 };
