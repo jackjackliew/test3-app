@@ -33,6 +33,7 @@ let storedShopId;
 let business = new insertBusiness_1.Business('12345612345612345612345612345612');
 let currentActiveShopify = (0, shopifySetup_1.shopifySetup)();
 app.use(body_parser_1.default.urlencoded({ extended: true }));
+<<<<<<< HEAD
 app.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const businessList = yield prisma.business.findMany({
         select: {
@@ -402,12 +403,21 @@ node_cron_1.default.schedule('*/5 * * * *', () => __awaiter(void 0, void 0, void
     else {
         console.log(shop);
         console.log(accessToken);
+<<<<<<< HEAD
         console.log('shop or access token invalid while running schedule update');
     }
     console.log('---------------------');
     console.log('running a task every 5 minutes');
 }));
 app.post('/shopify/getdailytotal', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+=======
+        console.log("shop or access token invalid while running schedule update");
+    }
+    console.log("---------------------");
+    console.log("running a task every 5 minutes");
+}));
+app.post("/shopify/getdailytotal", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+>>>>>>> 8d615d1 (deletee unwanted file)
     if (req.body.from_created_date !== '' || req.body.to_created_date !== '') {
         const getTotalSalesTransactionResults = yield (0, getShopifyData_1.getTotalSalesTransaction)(req.body, storedShopId, prisma);
         const getTotalRefundsTransactionResults = yield (0, getShopifyData_1.getTotalRefundsTransaction)(req.body, storedShopId, prisma);
@@ -421,13 +431,18 @@ app.post('/shopify/getdailytotal', (req, res) => __awaiter(void 0, void 0, void 
     else {
         const now = new Date(Date.now());
         now.setDate(now.getDate() + 1);
+<<<<<<< HEAD
         const last = new Date(Date.now() - 40 * 24 * 60 * 60 * 1000); //past 40 days
+=======
+        const last = new Date(Date.now() - (40 * 24 * 60 * 60 * 1000)); //past 40 days
+>>>>>>> 8d615d1 (deletee unwanted file)
         const fromDay = last.getDate();
         const fromMonth = last.getMonth() + 1;
         const fromYear = last.getFullYear();
         const toDay = now.getDate();
         const toMonth = now.getMonth() + 1;
         const toYear = now.getFullYear();
+<<<<<<< HEAD
         req.body.from_created_date = fromYear + '-' + fromMonth + '-' + ('0' + fromDay).slice(-2);
         req.body.to_created_date = toYear + '-' + toMonth + '-' + ('0' + toDay).slice(-2);
         console.log('to date: ' + req.body.to_created_date);
@@ -466,4 +481,8 @@ const myDate = () => __awaiter(void 0, void 0, void 0, function* () {
     const toYear = now.getFullYear();
     return { now, last, fromDay, fromMonth, fromYear, toDay, toMonth, toYear };
 });
+=======
+  }
+}`;
+>>>>>>> 8d615d1 (deletee unwanted file)
 //# sourceMappingURL=index.js.map
