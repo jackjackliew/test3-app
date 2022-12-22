@@ -52,13 +52,13 @@ model Facebook {
   website_purchase_conversion_value Decimal? @db.Decimal()
   offline_purchase_conversion_value Decimal? @db.Decimal()
   purchase_roas                     Decimal? @db.Decimal()
-  business_id                       String   @db.VarChar
+  business_id                       String   @db.Uuid
 
   business Business @relation(fields: [business_id], references: [business_id])
 }
 
 model Business {
-  business_id   String  @id @db.VarChar
+  business_id   String  @id @unique @db.Uuid
   business_name String?
   admin_id      String? @db.Uuid
   fb_id         String?
@@ -74,7 +74,7 @@ model Shopify {
   shopify_name String? @db.VarChar
   shopify_url  String  @unique @db.VarChar
   access_token String  @unique @db.VarChar
-  business_id  String  @db.VarChar
+  business_id  String  @db.Uuid
 
   orders         Order[]
   daily_insights Daily_insight[]

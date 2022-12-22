@@ -42,7 +42,7 @@ interface MyResponseBodyType {
   data: any;
 }
 
-let business = '123456';
+let business = '12345612345612345612345612345612';
 
 Shopify.Context.initialize({
   API_KEY,
