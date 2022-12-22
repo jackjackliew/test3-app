@@ -417,7 +417,11 @@ app.post('/shopify/getdailytotal', (req, res) => __awaiter(void 0, void 0, void 
     console.log("running a task every 5 minutes");
 }));
 app.post("/shopify/getdailytotal", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
     if (req.body.from_created_date !== '' || req.body.to_created_date !== '') {
         const getTotalSalesTransactionResults = yield (0, getShopifyData_1.getTotalSalesTransaction)(req.body, storedShopId, prisma);
         const getTotalRefundsTransactionResults = yield (0, getShopifyData_1.getTotalRefundsTransaction)(req.body, storedShopId, prisma);
@@ -435,7 +439,11 @@ app.post("/shopify/getdailytotal", (req, res) => __awaiter(void 0, void 0, void 
         const last = new Date(Date.now() - 40 * 24 * 60 * 60 * 1000); //past 40 days
 =======
         const last = new Date(Date.now() - (40 * 24 * 60 * 60 * 1000)); //past 40 days
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
         const fromDay = last.getDate();
         const fromMonth = last.getMonth() + 1;
         const fromYear = last.getFullYear();
@@ -484,5 +492,9 @@ const myDate = () => __awaiter(void 0, void 0, void 0, function* () {
 =======
   }
 }`;
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
 //# sourceMappingURL=index.js.map
