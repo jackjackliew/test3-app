@@ -169,3 +169,16 @@ but we have now is to able to
 the plan now is we will append the data from shopify shop to the existing table in pique in report tabs. for this to be done we will add a dropdown box to choose a shopify shops (this will be hardcorded for now). after choosing a shop, it will display the total sales, total refunds, total orders and average order sales for the past 40 days.
 
 and on the settings page there will also be a dropdown
+
+
+
+
+
+if login user is a marketing agency, then by right client's need to be added to the user first then each of the client will authorize access for respective FB analytics and shops. because FB and shop are owned by clients not marketing agency, so only clients will have the rights to approve access.
+
+whereas if login user is the client itself, then the current flow would make sense.
+
+
+
+
+as for the flow, invitation will be send to the user (developer send invitation to agency, agency admin send invitation to the clients), client user can create business where marketing tool will be added first, then shop. we think that might have some clients only want to do marketing analysis, so add shop is not mandatory when create business

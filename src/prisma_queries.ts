@@ -4,7 +4,7 @@ const prisma = new PrismaClient()
 
 async function main() {
   // ... you will write your Prisma Client queries here
-  const allOrders = await prisma.orders.findMany()
+  const allOrders = await prisma.order.findMany()
   console.log(allOrders);
 }
 
@@ -16,4 +16,5 @@ main()
     console.error(e)
     await prisma.$disconnect()
     process.exit(1)
-  })
+  });
+  
