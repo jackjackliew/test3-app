@@ -59,7 +59,11 @@ const SCOPES = process.env.SCOPES ? process.env.SCOPES : "";
 const SHOP = process.env.SHOP ? process.env.SHOP : "";
 const SHOP2 = process.env.SHOP2 ? process.env.SHOP2 : "";
 const HOST = process.env.HOST ? process.env.HOST : "";
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
 const { HOST_SCHEME } = process.env;
 let shop;
 let accessToken;
@@ -67,7 +71,11 @@ let storedShopId;
 <<<<<<< HEAD
 let business = '12345612345612345612345612345612';
 =======
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
 shopify_api_1.default.Context.initialize({
     API_KEY,
     API_SECRET_KEY,
@@ -88,7 +96,11 @@ app.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 =======
 app.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log("this is active shopify scopes : " + ACTIVE_SHOPIFY_SHOPS[shop]);
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
     //  This shop hasn't been seen yet, go through OAuth to create a session
     if (ACTIVE_SHOPIFY_SHOPS[shop] === undefined) {
         res.send(`<html>
@@ -117,7 +129,11 @@ app.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 app.get('/shopify/success', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 =======
 app.get("/shopify/success", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
     const client = new shopify_api_1.default.Clients.Graphql(shop, accessToken);
     try {
         const shopId = yield client.query({
@@ -126,7 +142,11 @@ app.get("/shopify/success", (req, res) => __awaiter(void 0, void 0, void 0, func
                 query: getShopId(),
 =======
                 query: getShopId()
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
             },
         });
         console.log(shopId.body.data.shop);
@@ -135,7 +155,11 @@ app.get("/shopify/success", (req, res) => __awaiter(void 0, void 0, void 0, func
         yield (0, prisma_queries_db_1.insertShop)(shopId.body.data.shop, accessToken, business);
 =======
         yield (0, prisma_queries_db_1.insertShop)(shopId.body.data.shop, accessToken);
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
         res.send(`<html>
         <body>
           <p>You have successfully authenticated.</p>
@@ -156,7 +180,11 @@ app.get("/shopify/success", (req, res) => __awaiter(void 0, void 0, void 0, func
         console.log('An error has occured: ' + err);
 =======
         console.log("An error has occured: " + err);
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
         res.send(`<html>
         <body>
           <p>Invalid shop domain or access token. Kindly insert correct details.</p>
@@ -189,7 +217,11 @@ app.get('/auth/callback', (req, res) => __awaiter(void 0, void 0, void 0, functi
 =======
         console.log("this is the shop name : " + shop);
         console.log("this is the access token : " + accessToken);
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
         // console.log(session.accessToken);
         console.log(session.scope);
     }
@@ -202,7 +234,11 @@ app.get('/auth/callback', (req, res) => __awaiter(void 0, void 0, void 0, functi
 app.get('/home', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 =======
 app.get("/home", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
     res.send(`<html>
         <body>
           <p>Welcome! kindly insert your shop name and access token</p>
@@ -221,7 +257,11 @@ app.get("/home", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 app.post('/shopify', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 =======
 app.post("/shopify", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
     if (req.body.shop_name !== undefined && req.body.shop_access_token !== undefined) {
         shop = req.body.shop_name;
         accessToken = req.body.shop_access_token;
@@ -233,7 +273,11 @@ app.post("/shopify", (req, res) => __awaiter(void 0, void 0, void 0, function* (
                     query: getShopId(),
 =======
                     query: getShopId()
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
                 },
             });
             console.log(shopId.body.data.shop);
@@ -242,7 +286,11 @@ app.post("/shopify", (req, res) => __awaiter(void 0, void 0, void 0, function* (
             yield (0, prisma_queries_db_1.insertShop)(shopId.body.data.shop, accessToken, business);
 =======
             yield (0, prisma_queries_db_1.insertShop)(shopId.body.data.shop, accessToken);
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
             res.send(`<html>
           <body>
             <p>You have successfully authenticated.</p>
@@ -263,7 +311,11 @@ app.post("/shopify", (req, res) => __awaiter(void 0, void 0, void 0, function* (
             console.log('An error has occured: ' + err);
 =======
             console.log("An error has occured: " + err);
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
             res.send(`<html>
           <body>
             <p>Invalid shop domain or access token. Kindly insert correct details.</p>
@@ -287,7 +339,11 @@ app.post('/shopify/getorders', (req, res) => __awaiter(void 0, void 0, void 0, f
 app.post("/shopify/getorders", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log(storedShopId);
     console.log(typeof (req.body.from_created_date));
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
     console.log(req.body.from_created_date);
     console.log(req.body.to_created_date);
     if (req.body.from_created_date !== '' || req.body.to_created_date !== '') {
@@ -315,7 +371,11 @@ app.post("/shopify/getorders", (req, res) => __awaiter(void 0, void 0, void 0, f
         let cursor = null;
         console.log("inside if else from : " + req.body.from_created_date);
         console.log("inside if else to : " + req.body.to_created_date);
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
         try {
             while (true) {
                 const orders = yield client.query({
@@ -326,7 +386,11 @@ app.post("/shopify/getorders", (req, res) => __awaiter(void 0, void 0, void 0, f
                             cursor: cursor,
 =======
                             cursor: cursor
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
                         },
                     },
                 });
@@ -355,7 +419,11 @@ app.post("/shopify/getorders", (req, res) => __awaiter(void 0, void 0, void 0, f
                 ;
             }
             ;
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
             res.send(`<html>
           <body>
             <p>Your orders data have been successfully retrieved from your shop.</p>
@@ -404,7 +472,11 @@ app.post("/shopify/getorders", (req, res) => __awaiter(void 0, void 0, void 0, f
         const toYear = now.getFullYear();
         req.body.from_created_date = fromYear + "-" + fromMonth + "-" + ("0" + fromDay).slice(-2);
         req.body.to_created_date = toYear + "-" + toMonth + "-" + ("0" + toDay).slice(-2);
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
         console.log(req.body.from_created_date);
         console.log(req.body.to_created_date);
         try {
@@ -417,7 +489,11 @@ app.post("/shopify/getorders", (req, res) => __awaiter(void 0, void 0, void 0, f
                             cursor: cursor,
 =======
                             cursor: cursor
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
                         },
                     },
                 });
@@ -445,7 +521,11 @@ app.post("/shopify/getorders", (req, res) => __awaiter(void 0, void 0, void 0, f
                 ;
             }
             ;
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
             res.send(`<html>
           <body>
             <p>Your orders data have been successfully retrieved from your shop.</p>
@@ -465,7 +545,11 @@ app.post("/shopify/getorders", (req, res) => __awaiter(void 0, void 0, void 0, f
             console.log('An error has occured when retrieving data from shop: ' + err);
 =======
             console.log("An error has occured when retrieving data from shop: " + err);
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
         }
     }
 }));
@@ -479,7 +563,11 @@ node_cron_1.default.schedule('*/5 * * * *', () => __awaiter(void 0, void 0, void
                     query: getShopId(),
 =======
                     query: getShopId()
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
                 },
             });
             storedShopId = shopId.body.data.shop.id;
@@ -491,7 +579,11 @@ node_cron_1.default.schedule('*/5 * * * *', () => __awaiter(void 0, void 0, void
                 const last = new Date(Date.now() - 40 * 24 * 60 * 60 * 1000); //past 40 days
 =======
                 const last = new Date(Date.now() - (40 * 24 * 60 * 60 * 1000)); //past 40 days
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
                 const fromDay = last.getDate();
                 const fromMonth = last.getMonth() + 1;
                 const fromYear = last.getFullYear();
@@ -505,7 +597,11 @@ node_cron_1.default.schedule('*/5 * * * *', () => __awaiter(void 0, void 0, void
 =======
                     from_created_date: fromYear + "-" + fromMonth + "-" + ("0" + fromDay).slice(-2),
                     to_created_date: toYear + "-" + toMonth + "-" + ("0" + toDay).slice(-2),
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
                 };
                 console.log(scheduleTime.from_created_date);
                 console.log(scheduleTime.to_created_date);
@@ -519,7 +615,11 @@ node_cron_1.default.schedule('*/5 * * * *', () => __awaiter(void 0, void 0, void
                                     cursor: cursor,
 =======
                                     cursor: cursor
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
                                 },
                             },
                         });
@@ -553,7 +653,11 @@ node_cron_1.default.schedule('*/5 * * * *', () => __awaiter(void 0, void 0, void
                 }
                 catch (err) {
                     console.log("An error has occured when retrieving data from shop: " + err);
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
                 }
             }
         }
@@ -562,7 +666,11 @@ node_cron_1.default.schedule('*/5 * * * *', () => __awaiter(void 0, void 0, void
             console.log('An error has occured: ' + err);
 =======
             console.log("An error has occured: " + err);
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
         }
     }
     else {
@@ -582,7 +690,11 @@ app.post('/shopify/getdailytotal', (req, res) => __awaiter(void 0, void 0, void 
     console.log("running a task every 5 minutes");
 }));
 app.post("/shopify/getdailytotal", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
     if (req.body.from_created_date !== '' || req.body.to_created_date !== '') {
         const getTotalSalesTransactionResults = yield (0, prisma_queries_db_1.getTotalSalesTransaction)(req.body, storedShopId);
         const getTotalRefundsTransactionResults = yield (0, prisma_queries_db_1.getTotalRefundsTransaction)(req.body, storedShopId);
@@ -600,7 +712,11 @@ app.post("/shopify/getdailytotal", (req, res) => __awaiter(void 0, void 0, void 
         const last = new Date(Date.now() - 40 * 24 * 60 * 60 * 1000); //past 40 days
 =======
         const last = new Date(Date.now() - (40 * 24 * 60 * 60 * 1000)); //past 40 days
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
         const fromDay = last.getDate();
         const fromMonth = last.getMonth() + 1;
         const fromYear = last.getFullYear();
@@ -617,7 +733,11 @@ app.post("/shopify/getdailytotal", (req, res) => __awaiter(void 0, void 0, void 
         req.body.to_created_date = toYear + "-" + toMonth + "-" + ("0" + toDay).slice(-2);
         console.log("to date: " + req.body.to_created_date);
         console.log("from date: " + req.body.from_created_date);
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
         const getTotalSalesTransactionResults = yield (0, prisma_queries_db_1.getTotalSalesTransaction)(req.body, storedShopId);
         const getTotalRefundsTransactionResults = yield (0, prisma_queries_db_1.getTotalRefundsTransaction)(req.body, storedShopId);
         if (getTotalSalesTransactionResults && getTotalRefundsTransactionResults) {
@@ -688,7 +808,11 @@ const getOrdersWithDate = (date) => `query orders($cursor: String) {
           shopMoney {
             amount
             currencyCode
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
           }
         }
         transactions {
@@ -712,7 +836,11 @@ const getOrdersWithDate = (date) => `query orders($cursor: String) {
             shopMoney {
               amount
               currencyCode
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
             }
           }
         }
@@ -753,5 +881,9 @@ const myDate = () => __awaiter(void 0, void 0, void 0, function* () {
 =======
   }
 }`;
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
 //# sourceMappingURL=index.js.map

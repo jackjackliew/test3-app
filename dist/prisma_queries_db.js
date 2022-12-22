@@ -138,7 +138,11 @@ const getOrderById = (reference_order_id) => __awaiter(void 0, void 0, void 0, f
         where: {
             reference_order_id
         }
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
     });
     if (getOrderById) {
         return getOrderById;
@@ -148,7 +152,11 @@ const getOrderById = (reference_order_id) => __awaiter(void 0, void 0, void 0, f
         console.log('error getting data with id');
 =======
         console.log("error getting data with id");
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
     }
 });
 exports.getOrderById = getOrderById;
@@ -202,7 +210,11 @@ const getTotalSalesTransaction = (transaction, shopifyId) => __awaiter(void 0, v
 });
 exports.insertTransaction = insertTransaction;
 const getTotalSalesTransaction = (transaction, shopId) => __awaiter(void 0, void 0, void 0, function* () {
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
     let date = {};
     console.log(transaction.from_created_date);
     console.log(transaction.to_created_date);
@@ -242,7 +254,11 @@ const getTotalSalesTransaction = (transaction, shopId) => __awaiter(void 0, void
         },
         orderBy: {
             transaction_created_at: 'asc'
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
         },
     });
     for (let i = 0; i < getSales.length; i++) {
@@ -259,7 +275,11 @@ const getTotalSalesTransaction = (transaction, shopId) => __awaiter(void 0, void
         if ((order === null || order === void 0 ? void 0 : order.shop_id) === shopId) {
             salesDate = getSales[i].transaction_created_at;
             console.log("salesDate: " + salesDate);
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
             if (salesDate) {
                 const day = salesDate.getDate();
                 const month = salesDate.getMonth() + 1;
@@ -294,7 +314,11 @@ const getTotalSalesTransaction = (transaction, shopId) => __awaiter(void 0, void
                     }
                     else {
                         date[convertedSalesDate] = getSales[i].transaction_presentment_amount;
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
                     }
                 }
             }
@@ -304,7 +328,11 @@ const getTotalSalesTransaction = (transaction, shopId) => __awaiter(void 0, void
             console.log('incorrect shop id');
 =======
             console.log("incorrect shop id");
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
         }
     }
     console.log(date);
@@ -313,7 +341,11 @@ const getTotalSalesTransaction = (transaction, shopId) => __awaiter(void 0, void
         (0, exports.insertDailyTotalSales)(key, date[key], shopifyId);
 =======
         (0, exports.insertDailyTotalSales)(key, date[key], shopId);
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
     }
     return getSales;
 });
@@ -332,7 +364,11 @@ const insertDailyTotalSales = (date, totalSales, shopId) => __awaiter(void 0, vo
             created_at_shop_id: {
                 created_at: new Date(date),
                 shop_id: shopId,
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
             },
         },
         update: {
@@ -345,7 +381,11 @@ const insertDailyTotalSales = (date, totalSales, shopId) => __awaiter(void 0, vo
             shopify_id: shopifyId,
 =======
             shop_id: shopId,
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
         },
     });
     if (insertTotalSales) {
@@ -364,7 +404,11 @@ const getDailyTotalSales = (date, shopifyId) => __awaiter(void 0, void 0, void 0
 });
 exports.insertDailyTotalSales = insertDailyTotalSales;
 const getDailyTotalSales = (date, shopId) => __awaiter(void 0, void 0, void 0, function* () {
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
     const getTotalSales = yield prisma.daily_insight.findMany({
         where: {
             created_at: {
@@ -375,7 +419,11 @@ const getDailyTotalSales = (date, shopId) => __awaiter(void 0, void 0, void 0, f
             shopify_id: shopifyId,
 =======
             shop_id: shopId,
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
         },
         select: {
             created_at: true,
@@ -386,7 +434,11 @@ const getDailyTotalSales = (date, shopId) => __awaiter(void 0, void 0, void 0, f
             created_at: 'asc',
 =======
             created_at: 'asc'
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
         },
     });
     return getTotalSales;
@@ -432,7 +484,11 @@ const getTotalRefundsTransaction = (transaction, shopId) => __awaiter(void 0, vo
         },
         orderBy: {
             transaction_created_at: 'asc'
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
         },
     });
     for (let i = 0; i < getRefunds.length; i++) {
@@ -449,7 +505,11 @@ const getTotalRefundsTransaction = (transaction, shopId) => __awaiter(void 0, vo
         if ((order === null || order === void 0 ? void 0 : order.shop_id) === shopId) {
             refundsDate = getRefunds[i].transaction_created_at;
             console.log("salesDate: " + refundsDate);
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
             if (refundsDate) {
                 const day = refundsDate.getDate();
                 const month = refundsDate.getMonth() + 1;
@@ -484,7 +544,11 @@ const getTotalRefundsTransaction = (transaction, shopId) => __awaiter(void 0, vo
                     }
                     else {
                         date[convertedRefundsDate] = getRefunds[i].transaction_presentment_amount;
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
                     }
                 }
             }
@@ -494,7 +558,11 @@ const getTotalRefundsTransaction = (transaction, shopId) => __awaiter(void 0, vo
             console.log('incorrect shop id');
 =======
             console.log("incorrect shop id");
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
         }
     }
     console.log(date);
@@ -518,7 +586,11 @@ const insertDailyTotalRefunds = (date, totalRefunds, shopId) => __awaiter(void 0
             created_at_shop_id: {
                 created_at: new Date(date),
                 shop_id: shopId,
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
             },
         },
         update: {
@@ -531,7 +603,11 @@ const insertDailyTotalRefunds = (date, totalRefunds, shopId) => __awaiter(void 0
             shopify_id: shopifyId,
 =======
             shop_id: shopId,
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
         },
     });
     if (insertTotalRefunds) {
@@ -550,7 +626,11 @@ const getDailyTotalRefunds = (date, shopifyId) => __awaiter(void 0, void 0, void
 });
 exports.insertDailyTotalRefunds = insertDailyTotalRefunds;
 const getDailyTotalRefunds = (date, shopId) => __awaiter(void 0, void 0, void 0, function* () {
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
     const getTotalRefunds = yield prisma.daily_insight.findMany({
         where: {
             created_at: {
@@ -561,7 +641,11 @@ const getDailyTotalRefunds = (date, shopId) => __awaiter(void 0, void 0, void 0,
             shopify_id: shopifyId,
 =======
             shop_id: shopId,
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
         },
         select: {
             created_at: true,
@@ -572,7 +656,11 @@ const getDailyTotalRefunds = (date, shopId) => __awaiter(void 0, void 0, void 0,
             created_at: 'asc',
 =======
             created_at: 'asc'
+<<<<<<< HEAD
 >>>>>>> 8d615d1 (deletee unwanted file)
+=======
+>>>>>>> 1c33734 (deletee unwanted file)
+>>>>>>> 4de0469 (deletee unwanted file)
         },
     });
     return getTotalRefunds;
