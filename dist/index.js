@@ -45,17 +45,29 @@ const prisma_queries_db_1 = require("./prisma_queries_db");
 require('dotenv').config();
 const app = (0, express_1.default)();
 const prisma = new client_1.PrismaClient();
+<<<<<<< HEAD
 const API_KEY = process.env.API_KEY ? process.env.API_KEY : '';
 const API_SECRET_KEY = process.env.API_SECRET_KEY ? process.env.API_SECRET_KEY : '';
 const SCOPES = process.env.SCOPES ? process.env.SCOPES : '';
 const SHOP = process.env.SHOP ? process.env.SHOP : '';
 const SHOP2 = process.env.SHOP2 ? process.env.SHOP2 : '';
 const HOST = process.env.HOST ? process.env.HOST : '';
+=======
+const API_KEY = process.env.API_KEY ? process.env.API_KEY : "";
+const API_SECRET_KEY = process.env.API_SECRET_KEY ? process.env.API_SECRET_KEY : "";
+const SCOPES = process.env.SCOPES ? process.env.SCOPES : "";
+const SHOP = process.env.SHOP ? process.env.SHOP : "";
+const SHOP2 = process.env.SHOP2 ? process.env.SHOP2 : "";
+const HOST = process.env.HOST ? process.env.HOST : "";
+>>>>>>> 8d615d1 (deletee unwanted file)
 const { HOST_SCHEME } = process.env;
 let shop;
 let accessToken;
 let storedShopId;
+<<<<<<< HEAD
 let business = '12345612345612345612345612345612';
+=======
+>>>>>>> 8d615d1 (deletee unwanted file)
 shopify_api_1.default.Context.initialize({
     API_KEY,
     API_SECRET_KEY,
@@ -70,8 +82,13 @@ shopify_api_1.default.Context.initialize({
 const ACTIVE_SHOPIFY_SHOPS = {};
 // the rest of the example code goes here
 app.use(body_parser_1.default.urlencoded({ extended: true }));
+<<<<<<< HEAD
 app.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log('this is active shopify scopes : ' + ACTIVE_SHOPIFY_SHOPS[shop]);
+=======
+app.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("this is active shopify scopes : " + ACTIVE_SHOPIFY_SHOPS[shop]);
+>>>>>>> 8d615d1 (deletee unwanted file)
     //  This shop hasn't been seen yet, go through OAuth to create a session
     if (ACTIVE_SHOPIFY_SHOPS[shop] === undefined) {
         res.send(`<html>
@@ -96,17 +113,29 @@ app.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.end();
     }
 }));
+<<<<<<< HEAD
 app.get('/shopify/success', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+=======
+app.get("/shopify/success", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+>>>>>>> 8d615d1 (deletee unwanted file)
     const client = new shopify_api_1.default.Clients.Graphql(shop, accessToken);
     try {
         const shopId = yield client.query({
             data: {
+<<<<<<< HEAD
                 query: getShopId(),
+=======
+                query: getShopId()
+>>>>>>> 8d615d1 (deletee unwanted file)
             },
         });
         console.log(shopId.body.data.shop);
         storedShopId = shopId.body.data.shop.id;
+<<<<<<< HEAD
         yield (0, prisma_queries_db_1.insertShop)(shopId.body.data.shop, accessToken, business);
+=======
+        yield (0, prisma_queries_db_1.insertShop)(shopId.body.data.shop, accessToken);
+>>>>>>> 8d615d1 (deletee unwanted file)
         res.send(`<html>
         <body>
           <p>You have successfully authenticated.</p>
@@ -123,7 +152,11 @@ app.get('/shopify/success', (req, res) => __awaiter(void 0, void 0, void 0, func
       </html>`);
     }
     catch (err) {
+<<<<<<< HEAD
         console.log('An error has occured: ' + err);
+=======
+        console.log("An error has occured: " + err);
+>>>>>>> 8d615d1 (deletee unwanted file)
         res.send(`<html>
         <body>
           <p>Invalid shop domain or access token. Kindly insert correct details.</p>
@@ -150,8 +183,13 @@ app.get('/auth/callback', (req, res) => __awaiter(void 0, void 0, void 0, functi
         console.log(session);
         ACTIVE_SHOPIFY_SHOPS[shop] = session.scope;
         accessToken = session.accessToken;
+<<<<<<< HEAD
         console.log('this is the shop name : ' + shop);
         console.log('this is the access token : ' + accessToken);
+=======
+        console.log("this is the shop name : " + shop);
+        console.log("this is the access token : " + accessToken);
+>>>>>>> 8d615d1 (deletee unwanted file)
         // console.log(session.accessToken);
         console.log(session.scope);
     }
@@ -160,7 +198,11 @@ app.get('/auth/callback', (req, res) => __awaiter(void 0, void 0, void 0, functi
     }
     return res.redirect(`/shopify/success?host=${req.query.host}&shop=${req.query.shop}`);
 }));
+<<<<<<< HEAD
 app.get('/home', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+=======
+app.get("/home", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+>>>>>>> 8d615d1 (deletee unwanted file)
     res.send(`<html>
         <body>
           <p>Welcome! kindly insert your shop name and access token</p>
@@ -175,7 +217,11 @@ app.get('/home', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
       </html>`);
     res.end();
 }));
+<<<<<<< HEAD
 app.post('/shopify', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+=======
+app.post("/shopify", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+>>>>>>> 8d615d1 (deletee unwanted file)
     if (req.body.shop_name !== undefined && req.body.shop_access_token !== undefined) {
         shop = req.body.shop_name;
         accessToken = req.body.shop_access_token;
@@ -183,12 +229,20 @@ app.post('/shopify', (req, res) => __awaiter(void 0, void 0, void 0, function* (
         try {
             const shopId = yield client.query({
                 data: {
+<<<<<<< HEAD
                     query: getShopId(),
+=======
+                    query: getShopId()
+>>>>>>> 8d615d1 (deletee unwanted file)
                 },
             });
             console.log(shopId.body.data.shop);
             storedShopId = shopId.body.data.shop.id;
+<<<<<<< HEAD
             yield (0, prisma_queries_db_1.insertShop)(shopId.body.data.shop, accessToken, business);
+=======
+            yield (0, prisma_queries_db_1.insertShop)(shopId.body.data.shop, accessToken);
+>>>>>>> 8d615d1 (deletee unwanted file)
             res.send(`<html>
           <body>
             <p>You have successfully authenticated.</p>
@@ -205,7 +259,11 @@ app.post('/shopify', (req, res) => __awaiter(void 0, void 0, void 0, function* (
         </html>`);
         }
         catch (err) {
+<<<<<<< HEAD
             console.log('An error has occured: ' + err);
+=======
+            console.log("An error has occured: " + err);
+>>>>>>> 8d615d1 (deletee unwanted file)
             res.send(`<html>
           <body>
             <p>Invalid shop domain or access token. Kindly insert correct details.</p>
@@ -221,9 +279,15 @@ app.post('/shopify', (req, res) => __awaiter(void 0, void 0, void 0, function* (
         }
     }
 }));
+<<<<<<< HEAD
 app.post('/shopify/getorders', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log(storedShopId);
     console.log(typeof req.body.from_created_date);
+=======
+app.post("/shopify/getorders", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log(storedShopId);
+    console.log(typeof (req.body.from_created_date));
+>>>>>>> 8d615d1 (deletee unwanted file)
     console.log(req.body.from_created_date);
     console.log(req.body.to_created_date);
     if (req.body.from_created_date !== '' || req.body.to_created_date !== '') {
@@ -233,6 +297,7 @@ app.post('/shopify/getorders', (req, res) => __awaiter(void 0, void 0, void 0, f
             const toDay = addOneDay.getDate();
             const toMonth = addOneDay.getMonth() + 1;
             const toYear = addOneDay.getFullYear();
+<<<<<<< HEAD
             req.body.to_created_date = toYear + '-' + toMonth + '-' + ('0' + toDay).slice(-2);
         }
         console.log('shopify get orders' + shop);
@@ -241,24 +306,56 @@ app.post('/shopify/getorders', (req, res) => __awaiter(void 0, void 0, void 0, f
         let cursor = null;
         console.log('inside if else from : ' + req.body.from_created_date);
         console.log('inside if else to : ' + req.body.to_created_date);
+=======
+            req.body.to_created_date = toYear + "-" + toMonth + "-" + ("0" + toDay).slice(-2);
+        }
+        console.log("shopify get orders" + shop);
+        console.log("shopify get orders" + accessToken);
+        const client = new shopify_api_1.default.Clients.Graphql(shop, accessToken);
+        let cursor = null;
+        console.log("inside if else from : " + req.body.from_created_date);
+        console.log("inside if else to : " + req.body.to_created_date);
+>>>>>>> 8d615d1 (deletee unwanted file)
         try {
             while (true) {
                 const orders = yield client.query({
                     data: {
                         query: getOrdersWithDate(req.body),
                         variables: {
+<<<<<<< HEAD
                             cursor: cursor,
+=======
+                            cursor: cursor
+>>>>>>> 8d615d1 (deletee unwanted file)
                         },
                     },
                 });
                 let nextPage = orders.body.data.orders.pageInfo.hasNextPage;
                 cursor = orders.body.data.orders.pageInfo.endCursor;
+<<<<<<< HEAD
                 insertData(orders);
                 if (nextPage === false) {
                     console.log('All data have been retrieved, no more next page');
                     break;
                 }
             }
+=======
+                for (let i = 0; i < orders.body.data.orders.edges.length; i++) {
+                    const order = orders.body.data.orders.edges[i].node;
+                    yield (0, prisma_queries_db_1.insertOrder)(order, storedShopId);
+                    for (let j = 0; j < order.transactions.length; j++) {
+                        console.log(order.transactions[j].createdAt);
+                        yield (0, prisma_queries_db_1.insertTransaction)(order, order.transactions[j]);
+                    }
+                }
+                if (nextPage === false) {
+                    console.log("All data have been retrieved, no more next page");
+                    break;
+                }
+                ;
+            }
+            ;
+>>>>>>> 8d615d1 (deletee unwanted file)
             res.send(`<html>
           <body>
             <p>Your orders data have been successfully retrieved from your shop.</p>
@@ -274,6 +371,7 @@ app.post('/shopify/getorders', (req, res) => __awaiter(void 0, void 0, void 0, f
         </html>`);
         }
         catch (err) {
+<<<<<<< HEAD
             console.log('An error has occured when retrieving data from shop: ' + err);
         }
     }
@@ -285,6 +383,28 @@ app.post('/shopify/getorders', (req, res) => __awaiter(void 0, void 0, void 0, f
         let thisDate = yield myDate();
         req.body.from_created_date = thisDate.fromYear + '-' + thisDate.fromMonth + '-' + ('0' + thisDate.fromDay).slice(-2);
         req.body.to_created_date = thisDate.toYear + '-' + thisDate.toMonth + '-' + ('0' + thisDate.toDay).slice(-2);
+=======
+            console.log("An error has occured when retrieving data from shop: " + err);
+        }
+    }
+    else {
+        console.log("shopify get orders" + shop);
+        console.log("shopify get orders" + accessToken);
+        const client = new shopify_api_1.default.Clients.Graphql(shop, accessToken);
+        let cursor = null;
+        const now = new Date(Date.now());
+        now.setDate(now.getDate() + 1);
+        const last = new Date(Date.now() - (40 * 24 * 60 * 60 * 1000)); //past 40 days
+        console.log("now : " + now);
+        const fromDay = last.getDate();
+        const fromMonth = last.getMonth() + 1;
+        const fromYear = last.getFullYear();
+        const toDay = now.getDate();
+        const toMonth = now.getMonth() + 1;
+        const toYear = now.getFullYear();
+        req.body.from_created_date = fromYear + "-" + fromMonth + "-" + ("0" + fromDay).slice(-2);
+        req.body.to_created_date = toYear + "-" + toMonth + "-" + ("0" + toDay).slice(-2);
+>>>>>>> 8d615d1 (deletee unwanted file)
         console.log(req.body.from_created_date);
         console.log(req.body.to_created_date);
         try {
@@ -293,18 +413,39 @@ app.post('/shopify/getorders', (req, res) => __awaiter(void 0, void 0, void 0, f
                     data: {
                         query: getOrdersWithDate(req.body),
                         variables: {
+<<<<<<< HEAD
                             cursor: cursor,
+=======
+                            cursor: cursor
+>>>>>>> 8d615d1 (deletee unwanted file)
                         },
                     },
                 });
                 let nextPage = orders.body.data.orders.pageInfo.hasNextPage;
                 cursor = orders.body.data.orders.pageInfo.endCursor;
+<<<<<<< HEAD
                 insertData(orders);
                 if (nextPage === false) {
                     console.log('All data have been retrieved, no more next page');
                     break;
                 }
             }
+=======
+                for (let i = 0; i < orders.body.data.orders.edges.length; i++) {
+                    const order = orders.body.data.orders.edges[i].node;
+                    yield (0, prisma_queries_db_1.insertOrder)(order, storedShopId);
+                    for (let j = 0; j < order.transactions.length; j++) {
+                        yield (0, prisma_queries_db_1.insertTransaction)(order, order.transactions[j]);
+                    }
+                }
+                if (nextPage === false) {
+                    console.log("All data have been retrieved, no more next page");
+                    break;
+                }
+                ;
+            }
+            ;
+>>>>>>> 8d615d1 (deletee unwanted file)
             res.send(`<html>
           <body>
             <p>Your orders data have been successfully retrieved from your shop.</p>
@@ -320,7 +461,11 @@ app.post('/shopify/getorders', (req, res) => __awaiter(void 0, void 0, void 0, f
         </html>`);
         }
         catch (err) {
+<<<<<<< HEAD
             console.log('An error has occured when retrieving data from shop: ' + err);
+=======
+            console.log("An error has occured when retrieving data from shop: " + err);
+>>>>>>> 8d615d1 (deletee unwanted file)
         }
     }
 }));
@@ -330,7 +475,11 @@ node_cron_1.default.schedule('*/5 * * * *', () => __awaiter(void 0, void 0, void
         try {
             const shopId = yield client.query({
                 data: {
+<<<<<<< HEAD
                     query: getShopId(),
+=======
+                    query: getShopId()
+>>>>>>> 8d615d1 (deletee unwanted file)
                 },
             });
             storedShopId = shopId.body.data.shop.id;
@@ -338,7 +487,11 @@ node_cron_1.default.schedule('*/5 * * * *', () => __awaiter(void 0, void 0, void
                 let cursor = null;
                 const now = new Date(Date.now());
                 now.setDate(now.getDate() + 1);
+<<<<<<< HEAD
                 const last = new Date(Date.now() - 40 * 24 * 60 * 60 * 1000); //past 40 days
+=======
+                const last = new Date(Date.now() - (40 * 24 * 60 * 60 * 1000)); //past 40 days
+>>>>>>> 8d615d1 (deletee unwanted file)
                 const fromDay = last.getDate();
                 const fromMonth = last.getMonth() + 1;
                 const fromYear = last.getFullYear();
@@ -346,8 +499,13 @@ node_cron_1.default.schedule('*/5 * * * *', () => __awaiter(void 0, void 0, void
                 const toMonth = now.getMonth() + 1;
                 const toYear = now.getFullYear();
                 let scheduleTime = {
+<<<<<<< HEAD
                     from_created_date: fromYear + '-' + fromMonth + '-' + ('0' + fromDay).slice(-2),
                     to_created_date: toYear + '-' + toMonth + '-' + ('0' + toDay).slice(-2),
+=======
+                    from_created_date: fromYear + "-" + fromMonth + "-" + ("0" + fromDay).slice(-2),
+                    to_created_date: toYear + "-" + toMonth + "-" + ("0" + toDay).slice(-2),
+>>>>>>> 8d615d1 (deletee unwanted file)
                 };
                 console.log(scheduleTime.from_created_date);
                 console.log(scheduleTime.to_created_date);
@@ -357,12 +515,17 @@ node_cron_1.default.schedule('*/5 * * * *', () => __awaiter(void 0, void 0, void
                             data: {
                                 query: getOrdersWithDate(scheduleTime),
                                 variables: {
+<<<<<<< HEAD
                                     cursor: cursor,
+=======
+                                    cursor: cursor
+>>>>>>> 8d615d1 (deletee unwanted file)
                                 },
                             },
                         });
                         let nextPage = orders.body.data.orders.pageInfo.hasNextPage;
                         cursor = orders.body.data.orders.pageInfo.endCursor;
+<<<<<<< HEAD
                         insertData(orders);
                         if (nextPage === false) {
                             console.log('All data have been retrieved, no more next page');
@@ -372,22 +535,54 @@ node_cron_1.default.schedule('*/5 * * * *', () => __awaiter(void 0, void 0, void
                 }
                 catch (err) {
                     console.log('An error has occured when retrieving data from shop: ' + err);
+=======
+                        for (let i = 0; i < orders.body.data.orders.edges.length; i++) {
+                            const order = orders.body.data.orders.edges[i].node;
+                            yield (0, prisma_queries_db_1.insertOrder)(order, storedShopId);
+                            for (let j = 0; j < order.transactions.length; j++) {
+                                yield (0, prisma_queries_db_1.insertTransaction)(order, order.transactions[j]);
+                            }
+                        }
+                        if (nextPage === false) {
+                            console.log("All data have been retrieved, no more next page");
+                            break;
+                        }
+                        ;
+                    }
+                    ;
+                }
+                catch (err) {
+                    console.log("An error has occured when retrieving data from shop: " + err);
+>>>>>>> 8d615d1 (deletee unwanted file)
                 }
             }
         }
         catch (err) {
+<<<<<<< HEAD
             console.log('An error has occured: ' + err);
+=======
+            console.log("An error has occured: " + err);
+>>>>>>> 8d615d1 (deletee unwanted file)
         }
     }
     else {
         console.log(shop);
         console.log(accessToken);
+<<<<<<< HEAD
         console.log('shop or access token invalid while running schedule update');
     }
     console.log('---------------------');
     console.log('running a task every 5 minutes');
 }));
 app.post('/shopify/getdailytotal', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+=======
+        console.log("shop or access token invalid while running schedule update");
+    }
+    console.log("---------------------");
+    console.log("running a task every 5 minutes");
+}));
+app.post("/shopify/getdailytotal", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+>>>>>>> 8d615d1 (deletee unwanted file)
     if (req.body.from_created_date !== '' || req.body.to_created_date !== '') {
         const getTotalSalesTransactionResults = yield (0, prisma_queries_db_1.getTotalSalesTransaction)(req.body, storedShopId);
         const getTotalRefundsTransactionResults = yield (0, prisma_queries_db_1.getTotalRefundsTransaction)(req.body, storedShopId);
@@ -401,17 +596,28 @@ app.post('/shopify/getdailytotal', (req, res) => __awaiter(void 0, void 0, void 
     else {
         const now = new Date(Date.now());
         now.setDate(now.getDate() + 1);
+<<<<<<< HEAD
         const last = new Date(Date.now() - 40 * 24 * 60 * 60 * 1000); //past 40 days
+=======
+        const last = new Date(Date.now() - (40 * 24 * 60 * 60 * 1000)); //past 40 days
+>>>>>>> 8d615d1 (deletee unwanted file)
         const fromDay = last.getDate();
         const fromMonth = last.getMonth() + 1;
         const fromYear = last.getFullYear();
         const toDay = now.getDate();
         const toMonth = now.getMonth() + 1;
         const toYear = now.getFullYear();
+<<<<<<< HEAD
         req.body.from_created_date = fromYear + '-' + fromMonth + '-' + ('0' + fromDay).slice(-2);
         req.body.to_created_date = toYear + '-' + toMonth + '-' + ('0' + toDay).slice(-2);
         console.log('to date: ' + req.body.to_created_date);
         console.log('from date: ' + req.body.from_created_date);
+=======
+        req.body.from_created_date = fromYear + "-" + fromMonth + "-" + ("0" + fromDay).slice(-2);
+        req.body.to_created_date = toYear + "-" + toMonth + "-" + ("0" + toDay).slice(-2);
+        console.log("to date: " + req.body.to_created_date);
+        console.log("from date: " + req.body.from_created_date);
+>>>>>>> 8d615d1 (deletee unwanted file)
         const getTotalSalesTransactionResults = yield (0, prisma_queries_db_1.getTotalSalesTransaction)(req.body, storedShopId);
         const getTotalRefundsTransactionResults = yield (0, prisma_queries_db_1.getTotalRefundsTransaction)(req.body, storedShopId);
         if (getTotalSalesTransactionResults && getTotalRefundsTransactionResults) {
@@ -434,6 +640,7 @@ const getOrdersWithDate = (date) => `query orders($cursor: String) {
     edges {
       node {
         id
+<<<<<<< HEAD
         createdAt 
         displayFulfillmentStatus
         displayFinancialStatus
@@ -466,16 +673,46 @@ const getOrdersWithDate = (date) => `query orders($cursor: String) {
           channelDefinition {
             channelName
             subChannelName
+=======
+        createdAt
+        cancelledAt
+        displayFulfillmentStatus
+        displayFinancialStatus
+        taxesIncluded
+        discountCodes
+        totalDiscountsSet {
+          presentmentMoney {
+            amount
+            currencyCode
+          }
+          shopMoney {
+            amount
+            currencyCode
+>>>>>>> 8d615d1 (deletee unwanted file)
           }
         }
         transactions {
           id
+<<<<<<< HEAD
           createdAt
           kind
           status
           amountSet {
             shopMoney {
               amount
+=======
+          kind
+          status
+          createdAt
+          amountSet {
+            presentmentMoney {
+              amount
+              currencyCode
+            }
+            shopMoney {
+              amount
+              currencyCode
+>>>>>>> 8d615d1 (deletee unwanted file)
             }
           }
         }
@@ -488,6 +725,7 @@ const getShopId = () => `query {
     id
     name
     url
+<<<<<<< HEAD
     currencyCode
   }
 }`;
@@ -512,4 +750,8 @@ const myDate = () => __awaiter(void 0, void 0, void 0, function* () {
     const toYear = now.getFullYear();
     return { now, last, fromDay, fromMonth, fromYear, toDay, toMonth, toYear };
 });
+=======
+  }
+}`;
+>>>>>>> 8d615d1 (deletee unwanted file)
 //# sourceMappingURL=index.js.map
