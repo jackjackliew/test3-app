@@ -13,15 +13,49 @@ model User {
   username String  @unique @default("")
   password String? @db.VarChar
 
-  roles      Role[]
-  businesses Business[]
+  roles      RoleOnUser[]
+  businesses UserOnBusiness[]
 }
 
 model Role {
   role_id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name    String @default("")
 
-  users User[]
+  users RoleOnUser[]
+}
+
+model RoleOnUser {
+  user       User     @relation(fields: [user_id], references: [user_id])
+  user_id    String
+  role       Role     @relation(fields: [role_id], references: [role_id])
+  role_id    String
+  assignedAt DateTime @default(now())
+  assignedBy String
+
+  @@id([user_id, role_id])
+}
+
+model Business {
+  business_id   String  @id @unique @db.Uuid
+  business_name String? @db.VarChar
+  admin_id      String? @db.Uuid
+  fb_id         String? @db.VarChar
+  shopify_id    String? @db.VarChar
+
+  users     UserOnBusiness[]
+  facebooks Facebook[]
+  shopify   Shopify[]
+}
+
+model UserOnBusiness {
+  user        User     @relation(fields: [user_id], references: [user_id])
+  user_id     String
+  business    Business @relation(fields: [business_id], references: [business_id])
+  business_id String
+  assignedAt  DateTime @default(now())
+  assignedBy  String
+
+  @@id([business_id, user_id])
 }
 
 model Facebook {
@@ -55,18 +89,6 @@ model Facebook {
   business_id                       String   @db.Uuid
 
   business Business @relation(fields: [business_id], references: [business_id])
-}
-
-model Business {
-  business_id   String  @id @unique @db.Uuid
-  business_name String? @db.VarChar
-  admin_id      String? @db.Uuid
-  fb_id         String? @db.VarChar
-  shopify_id    String? @db.VarChar
-
-  users     User[]
-  facebooks Facebook[]
-  shopify   Shopify[]
 }
 
 model Shopify {
