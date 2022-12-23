@@ -4,11 +4,7 @@ import Shopify, { ApiVersion, AuthQuery } from '@shopify/shopify-api';
 import cron from 'node-cron';
 import bodyParser from 'body-parser';
 import { PrismaClient } from '@prisma/client';
-import {
-  getTotalSales30Days,
-  getTotalRefund30Days,
-  getTotalPending30Days,
-} from './queries';
+import { getTotalSales30Days, getTotalRefund30Days, getTotalPending30Days } from './queries';
 import {
   insertOrder,
   insertTransaction,
@@ -17,6 +13,7 @@ import {
   getTotalRefundsTransaction,
   getDailyTotalRefunds,
   insertShop,
+  insertDailyTotalRefunds,
 } from './prisma_queries_db';
 require('dotenv').config();
 
@@ -24,9 +21,7 @@ const app = express();
 const prisma = new PrismaClient();
 
 const API_KEY = process.env.API_KEY ? process.env.API_KEY : '';
-const API_SECRET_KEY = process.env.API_SECRET_KEY
-  ? process.env.API_SECRET_KEY
-  : '';
+const API_SECRET_KEY = process.env.API_SECRET_KEY ? process.env.API_SECRET_KEY : '';
 const SCOPES = process.env.SCOPES ? process.env.SCOPES : '';
 const SHOP = process.env.SHOP ? process.env.SHOP : '';
 const SHOP2 = process.env.SHOP2 ? process.env.SHOP2 : '';
@@ -143,24 +138,14 @@ app.get('/shopify/success', async (req, res) => {
 app.get('/login', async (req, res) => {
   shop = req.query.shop_name;
 
-  let authRoute = await Shopify.Auth.beginAuth(
-    req,
-    res,
-    shop,
-    '/auth/callback',
-    false
-  );
+  let authRoute = await Shopify.Auth.beginAuth(req, res, shop, '/auth/callback', false);
   console.log(authRoute);
   return res.redirect(authRoute);
 });
 
 app.get('/auth/callback', async (req, res) => {
   try {
-    const session = await Shopify.Auth.validateAuthCallback(
-      req,
-      res,
-      req.query as unknown as AuthQuery
-    ); // req.query must be cast to unkown and then AuthQuery in order to be accepted
+    const session = await Shopify.Auth.validateAuthCallback(req, res, req.query as unknown as AuthQuery); // req.query must be cast to unkown and then AuthQuery in order to be accepted
 
     console.log(session);
     ACTIVE_SHOPIFY_SHOPS[shop] = session.scope;
@@ -173,9 +158,7 @@ app.get('/auth/callback', async (req, res) => {
     console.error(error); // in practice these should be handled more gracefully
   }
 
-  return res.redirect(
-    `/shopify/success?host=${req.query.host}&shop=${req.query.shop}`
-  );
+  return res.redirect(`/shopify/success?host=${req.query.host}&shop=${req.query.shop}`);
 });
 
 app.get('/home', async (req, res) => {
@@ -197,10 +180,7 @@ app.get('/home', async (req, res) => {
 });
 
 app.post('/shopify', async (req, res) => {
-  if (
-    req.body.shop_name !== undefined &&
-    req.body.shop_access_token !== undefined
-  ) {
+  if (req.body.shop_name !== undefined && req.body.shop_access_token !== undefined) {
     shop = req.body.shop_name;
     accessToken = req.body.shop_access_token;
 
@@ -266,8 +246,7 @@ app.post('/shopify/getorders', async (req, res) => {
       const toDay = addOneDay.getDate();
       const toMonth = addOneDay.getMonth() + 1;
       const toYear = addOneDay.getFullYear();
-      req.body.to_created_date =
-        toYear + '-' + toMonth + '-' + ('0' + toDay).slice(-2);
+      req.body.to_created_date = toYear + '-' + toMonth + '-' + ('0' + toDay).slice(-2);
     }
     console.log('shopify get orders' + shop);
     console.log('shopify get orders' + accessToken);
@@ -290,14 +269,7 @@ app.post('/shopify/getorders', async (req, res) => {
         let nextPage = orders.body.data.orders.pageInfo.hasNextPage;
         cursor = orders.body.data.orders.pageInfo.endCursor;
 
-        for (let i = 0; i < orders.body.data.orders.edges.length; i++) {
-          const order = orders.body.data.orders.edges[i].node;
-          await insertOrder(order, storedShopId);
-          for (let j = 0; j < order.transactions.length; j++) {
-            console.log(order.transactions[j].createdAt);
-            await insertTransaction(order, order.transactions[j]);
-          }
-        }
+        insertData(orders);
 
         if (nextPage === false) {
           console.log('All data have been retrieved, no more next page');
@@ -321,9 +293,7 @@ app.post('/shopify/getorders', async (req, res) => {
         </html>`
       );
     } catch (err) {
-      console.log(
-        'An error has occured when retrieving data from shop: ' + err
-      );
+      console.log('An error has occured when retrieving data from shop: ' + err);
     }
   } else {
     console.log('shopify get orders' + shop);
@@ -331,20 +301,11 @@ app.post('/shopify/getorders', async (req, res) => {
     const client = new Shopify.Clients.Graphql(shop, accessToken);
 
     let cursor = null;
-    const now = new Date(Date.now());
-    now.setDate(now.getDate() + 1);
-    const last = new Date(Date.now() - 40 * 24 * 60 * 60 * 1000); //past 40 days
-    console.log('now : ' + now);
-    const fromDay = last.getDate();
-    const fromMonth = last.getMonth() + 1;
-    const fromYear = last.getFullYear();
-    const toDay = now.getDate();
-    const toMonth = now.getMonth() + 1;
-    const toYear = now.getFullYear();
-    req.body.from_created_date =
-      fromYear + '-' + fromMonth + '-' + ('0' + fromDay).slice(-2);
-    req.body.to_created_date =
-      toYear + '-' + toMonth + '-' + ('0' + toDay).slice(-2);
+
+    let thisDate = await myDate();
+
+    req.body.from_created_date = thisDate.fromYear + '-' + thisDate.fromMonth + '-' + ('0' + thisDate.fromDay).slice(-2);
+    req.body.to_created_date = thisDate.toYear + '-' + thisDate.toMonth + '-' + ('0' + thisDate.toDay).slice(-2);
 
     console.log(req.body.from_created_date);
     console.log(req.body.to_created_date);
@@ -363,13 +324,7 @@ app.post('/shopify/getorders', async (req, res) => {
         let nextPage = orders.body.data.orders.pageInfo.hasNextPage;
         cursor = orders.body.data.orders.pageInfo.endCursor;
 
-        for (let i = 0; i < orders.body.data.orders.edges.length; i++) {
-          const order = orders.body.data.orders.edges[i].node;
-          await insertOrder(order, storedShopId);
-          for (let j = 0; j < order.transactions.length; j++) {
-            await insertTransaction(order, order.transactions[j]);
-          }
-        }
+        insertData(orders);
 
         if (nextPage === false) {
           console.log('All data have been retrieved, no more next page');
@@ -393,9 +348,7 @@ app.post('/shopify/getorders', async (req, res) => {
         </html>`
       );
     } catch (err) {
-      console.log(
-        'An error has occured when retrieving data from shop: ' + err
-      );
+      console.log('An error has occured when retrieving data from shop: ' + err);
     }
   }
 });
@@ -424,10 +377,8 @@ cron.schedule('*/5 * * * *', async () => {
         const toMonth = now.getMonth() + 1;
         const toYear = now.getFullYear();
         let scheduleTime = {
-          from_created_date:
-            fromYear + '-' + fromMonth + '-' + ('0' + fromDay).slice(-2),
-          to_created_date:
-            toYear + '-' + toMonth + '-' + ('0' + toDay).slice(-2),
+          from_created_date: fromYear + '-' + fromMonth + '-' + ('0' + fromDay).slice(-2),
+          to_created_date: toYear + '-' + toMonth + '-' + ('0' + toDay).slice(-2),
         };
 
         console.log(scheduleTime.from_created_date);
@@ -447,13 +398,7 @@ cron.schedule('*/5 * * * *', async () => {
             let nextPage = orders.body.data.orders.pageInfo.hasNextPage;
             cursor = orders.body.data.orders.pageInfo.endCursor;
 
-            for (let i = 0; i < orders.body.data.orders.edges.length; i++) {
-              const order = orders.body.data.orders.edges[i].node;
-              await insertOrder(order, storedShopId);
-              for (let j = 0; j < order.transactions.length; j++) {
-                await insertTransaction(order, order.transactions[j]);
-              }
-            }
+            insertData(orders);
 
             if (nextPage === false) {
               console.log('All data have been retrieved, no more next page');
@@ -461,9 +406,7 @@ cron.schedule('*/5 * * * *', async () => {
             }
           }
         } catch (err) {
-          console.log(
-            'An error has occured when retrieving data from shop: ' + err
-          );
+          console.log('An error has occured when retrieving data from shop: ' + err);
         }
       }
     } catch (err) {
@@ -480,23 +423,11 @@ cron.schedule('*/5 * * * *', async () => {
 
 app.post('/shopify/getdailytotal', async (req, res) => {
   if (req.body.from_created_date !== '' || req.body.to_created_date !== '') {
-    const getTotalSalesTransactionResults = await getTotalSalesTransaction(
-      req.body,
-      storedShopId
-    );
-    const getTotalRefundsTransactionResults = await getTotalRefundsTransaction(
-      req.body,
-      storedShopId
-    );
+    const getTotalSalesTransactionResults = await getTotalSalesTransaction(req.body, storedShopId);
+    const getTotalRefundsTransactionResults = await getTotalRefundsTransaction(req.body, storedShopId);
     if (getTotalSalesTransactionResults && getTotalRefundsTransactionResults) {
-      const getDailyTotalSalesResults = await getDailyTotalSales(
-        req.body,
-        storedShopId
-      );
-      const getDailyTotalRefundsResults = await getDailyTotalRefunds(
-        req.body,
-        storedShopId
-      );
+      const getDailyTotalSalesResults = await getDailyTotalSales(req.body, storedShopId);
+      const getDailyTotalRefundsResults = await getDailyTotalRefunds(req.body, storedShopId);
       console.log(getDailyTotalSalesResults);
       console.log(getDailyTotalRefundsResults);
     }
@@ -510,29 +441,15 @@ app.post('/shopify/getdailytotal', async (req, res) => {
     const toDay = now.getDate();
     const toMonth = now.getMonth() + 1;
     const toYear = now.getFullYear();
-    req.body.from_created_date =
-      fromYear + '-' + fromMonth + '-' + ('0' + fromDay).slice(-2);
-    req.body.to_created_date =
-      toYear + '-' + toMonth + '-' + ('0' + toDay).slice(-2);
+    req.body.from_created_date = fromYear + '-' + fromMonth + '-' + ('0' + fromDay).slice(-2);
+    req.body.to_created_date = toYear + '-' + toMonth + '-' + ('0' + toDay).slice(-2);
     console.log('to date: ' + req.body.to_created_date);
     console.log('from date: ' + req.body.from_created_date);
-    const getTotalSalesTransactionResults = await getTotalSalesTransaction(
-      req.body,
-      storedShopId
-    );
-    const getTotalRefundsTransactionResults = await getTotalRefundsTransaction(
-      req.body,
-      storedShopId
-    );
+    const getTotalSalesTransactionResults = await getTotalSalesTransaction(req.body, storedShopId);
+    const getTotalRefundsTransactionResults = await getTotalRefundsTransaction(req.body, storedShopId);
     if (getTotalSalesTransactionResults && getTotalRefundsTransactionResults) {
-      const getDailyTotalSalesResults = await getDailyTotalSales(
-        req.body,
-        storedShopId
-      );
-      const getDailyTotalRefundsResults = await getDailyTotalRefunds(
-        req.body,
-        storedShopId
-      );
+      const getDailyTotalSalesResults = await getDailyTotalSales(req.body, storedShopId);
+      const getDailyTotalRefundsResults = await getDailyTotalRefunds(req.body, storedShopId);
       console.log(getDailyTotalSalesResults);
       console.log(getDailyTotalRefundsResults);
     }
@@ -558,14 +475,34 @@ const getOrdersWithDate = (date: any) => `query orders($cursor: String) {
         totalDiscountsSet {
           shopMoney {
             amount
-            currencyCode
           }
         }
-        totalPriceSet
-        totalReceviedSet
-        totalRefundedSet
-        netPaymentSet
-        channelInformation
+        totalPriceSet {
+          shopMoney {
+            amount
+          }
+        }
+        totalReceivedSet {
+          shopMoney {
+            amount
+          }
+        }
+        totalRefundedSet {
+          shopMoney {
+            amount
+          }
+        }
+        netPaymentSet {
+          shopMoney {
+            amount
+          }
+        }
+        channelInformation {
+          channelDefinition {
+            channelName
+            subChannelName
+          }
+        }
         transactions {
           id
           createdAt
@@ -574,7 +511,6 @@ const getOrdersWithDate = (date: any) => `query orders($cursor: String) {
           amountSet {
             shopMoney {
               amount
-              currencyCode
             }
           }
         }
@@ -591,3 +527,26 @@ const getShopId = () => `query {
     currencyCode
   }
 }`;
+
+const insertData = async (orders: any): Promise<void> => {
+  for (let i = 0; i < orders.body.data.orders.edges.length; i++) {
+    const order = orders.body.data.orders.edges[i].node;
+    await insertOrder(order, storedShopId);
+    for (let j = 0; j < order.transactions.length; j++) {
+      await insertTransaction(order, order.transactions[j]);
+    }
+  }
+};
+
+const myDate = async () => {
+  const now = new Date(Date.now());
+  now.setDate(now.getDate() + 1);
+  const last = new Date(Date.now() - 40 * 24 * 60 * 60 * 1000); //past 40 days
+  const fromDay = last.getDate();
+  const fromMonth = last.getMonth() + 1;
+  const fromYear = last.getFullYear();
+  const toDay = now.getDate();
+  const toMonth = now.getMonth() + 1;
+  const toYear = now.getFullYear();
+  return { now, last, fromDay, fromMonth, fromYear, toDay, toMonth, toYear };
+};
