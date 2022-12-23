@@ -12,6 +12,7 @@ import {
   getTotalRefundsTransaction,
   getDailyTotalRefunds,
   insertShop,
+  insertBusiness,
 } from './prisma_queries_db';
 require('dotenv').config();
 
@@ -29,13 +30,13 @@ const { HOST_SCHEME } = process.env;
 let shop: any;
 let accessToken: any;
 let storedShopId: any;
+let businessName: any;
+let business: any;
 // let shopName: any;
 
 interface MyResponseBodyType {
   data: any;
 }
-
-let business = '12345612345612345612345612345612';
 
 Shopify.Context.initialize({
   API_KEY,
@@ -55,6 +56,24 @@ const ACTIVE_SHOPIFY_SHOPS: { [key: string]: string | undefined } = {};
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get('/', async (req, res) => {
+  res.send(
+    `<html>
+      <body>
+        <p>Welcome! Please create a business</p>
+        <form action="/insertshop" method="get">
+          <label for="business_name">Enter your business name :</label>
+          <input type="text" id="business_name" name="business_name" required>
+          <button type="submit">Submit</button>
+        </form>
+      </body>
+    </html>`
+  );
+});
+
+app.get('/insertshop', async (req, res) => {
+  businessName = req.query.business_name;
+  business = await insertBusiness(businessName);
+  console.log(business);
   console.log('this is active shopify scopes : ' + ACTIVE_SHOPIFY_SHOPS[shop]);
   //  This shop hasn't been seen yet, go through OAuth to create a session
   if (ACTIVE_SHOPIFY_SHOPS[shop] === undefined) {
@@ -365,18 +384,12 @@ cron.schedule('*/5 * * * *', async () => {
 
       if (storedShopId !== undefined) {
         let cursor = null;
-        const now = new Date(Date.now());
-        now.setDate(now.getDate() + 1);
-        const last = new Date(Date.now() - 40 * 24 * 60 * 60 * 1000); //past 40 days
-        const fromDay = last.getDate();
-        const fromMonth = last.getMonth() + 1;
-        const fromYear = last.getFullYear();
-        const toDay = now.getDate();
-        const toMonth = now.getMonth() + 1;
-        const toYear = now.getFullYear();
+
+        let thisDate = await myDate();
+
         let scheduleTime = {
-          from_created_date: fromYear + '-' + fromMonth + '-' + ('0' + fromDay).slice(-2),
-          to_created_date: toYear + '-' + toMonth + '-' + ('0' + toDay).slice(-2),
+          from_created_date: thisDate.fromYear + '-' + thisDate.fromMonth + '-' + ('0' + thisDate.fromDay).slice(-2),
+          to_created_date: thisDate.toYear + '-' + thisDate.toMonth + '-' + ('0' + thisDate.toDay).slice(-2),
         };
 
         console.log(scheduleTime.from_created_date);
@@ -430,17 +443,9 @@ app.post('/shopify/getdailytotal', async (req, res) => {
       console.log(getDailyTotalRefundsResults);
     }
   } else {
-    const now = new Date(Date.now());
-    now.setDate(now.getDate() + 1);
-    const last = new Date(Date.now() - 40 * 24 * 60 * 60 * 1000); //past 40 days
-    const fromDay = last.getDate();
-    const fromMonth = last.getMonth() + 1;
-    const fromYear = last.getFullYear();
-    const toDay = now.getDate();
-    const toMonth = now.getMonth() + 1;
-    const toYear = now.getFullYear();
-    req.body.from_created_date = fromYear + '-' + fromMonth + '-' + ('0' + fromDay).slice(-2);
-    req.body.to_created_date = toYear + '-' + toMonth + '-' + ('0' + toDay).slice(-2);
+    let thisDate = await myDate();
+    req.body.from_created_date = thisDate.fromYear + '-' + thisDate.fromMonth + '-' + ('0' + thisDate.fromDay).slice(-2);
+    req.body.to_created_date = thisDate.toYear + '-' + thisDate.toMonth + '-' + ('0' + thisDate.toDay).slice(-2);
     console.log('to date: ' + req.body.to_created_date);
     console.log('from date: ' + req.body.from_created_date);
     const getTotalSalesTransactionResults = await getTotalSalesTransaction(req.body, storedShopId);

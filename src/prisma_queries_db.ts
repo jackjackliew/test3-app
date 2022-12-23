@@ -2,6 +2,18 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+export const insertBusiness = async (businessName: any) => {
+  const insertBusiness = await prisma.business.create({
+    data: {
+      business_name: businessName,
+    },
+    select: {
+      business_id: true,
+    },
+  });
+  return insertBusiness.business_id;
+};
+
 export const insertShop = async (shopify: any, accessToken: any, businessId: any) => {
   const insertShop = await prisma.shopify.upsert({
     where: {

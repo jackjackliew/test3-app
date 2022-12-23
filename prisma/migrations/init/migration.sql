@@ -28,7 +28,7 @@ CREATE TABLE "RoleOnUser" (
 
 -- CreateTable
 CREATE TABLE "Business" (
-    "business_id" UUID NOT NULL,
+    "business_id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "business_name" VARCHAR,
     "admin_id" UUID,
     "fb_id" VARCHAR,
