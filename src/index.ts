@@ -431,17 +431,9 @@ app.post('/shopify/getdailytotal', async (req, res) => {
       console.log(getDailyTotalRefundsResults);
     }
   } else {
-    const now = new Date(Date.now());
-    now.setDate(now.getDate() + 1);
-    const last = new Date(Date.now() - 40 * 24 * 60 * 60 * 1000); //past 40 days
-    const fromDay = last.getDate();
-    const fromMonth = last.getMonth() + 1;
-    const fromYear = last.getFullYear();
-    const toDay = now.getDate();
-    const toMonth = now.getMonth() + 1;
-    const toYear = now.getFullYear();
-    req.body.from_created_date = fromYear + '-' + fromMonth + '-' + ('0' + fromDay).slice(-2);
-    req.body.to_created_date = toYear + '-' + toMonth + '-' + ('0' + toDay).slice(-2);
+    let thisDate = await myDate();
+    req.body.from_created_date = thisDate.fromYear + '-' + thisDate.fromMonth + '-' + ('0' + thisDate.fromDay).slice(-2);
+    req.body.to_created_date = thisDate.toYear + '-' + thisDate.toMonth + '-' + ('0' + thisDate.toDay).slice(-2);
     console.log('to date: ' + req.body.to_created_date);
     console.log('from date: ' + req.body.from_created_date);
     const getTotalSalesTransactionResults = await getTotalSalesTransaction(req.body, storedShopId, prisma);
