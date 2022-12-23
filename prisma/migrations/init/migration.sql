@@ -3,7 +3,7 @@ CREATE TABLE "User" (
     "user_id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "name" TEXT NOT NULL DEFAULT '',
     "username" TEXT NOT NULL DEFAULT '',
-    "password" TEXT,
+    "password" VARCHAR,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("user_id")
 );
