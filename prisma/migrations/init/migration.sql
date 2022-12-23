@@ -17,6 +17,37 @@ CREATE TABLE "Role" (
 );
 
 -- CreateTable
+CREATE TABLE "RoleOnUser" (
+    "user_id" UUID NOT NULL,
+    "role_id" UUID NOT NULL,
+    "assignedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "assignedBy" TEXT NOT NULL,
+
+    CONSTRAINT "RoleOnUser_pkey" PRIMARY KEY ("user_id","role_id")
+);
+
+-- CreateTable
+CREATE TABLE "Business" (
+    "business_id" UUID NOT NULL,
+    "business_name" VARCHAR,
+    "admin_id" UUID,
+    "fb_id" VARCHAR,
+    "shopify_id" VARCHAR,
+
+    CONSTRAINT "Business_pkey" PRIMARY KEY ("business_id")
+);
+
+-- CreateTable
+CREATE TABLE "UserOnBusiness" (
+    "user_id" UUID NOT NULL,
+    "business_id" UUID NOT NULL,
+    "assignedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "assignedBy" TEXT NOT NULL,
+
+    CONSTRAINT "UserOnBusiness_pkey" PRIMARY KEY ("business_id","user_id")
+);
+
+-- CreateTable
 CREATE TABLE "Facebook" (
     "facebook_id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "fb_name" TEXT,
@@ -48,17 +79,6 @@ CREATE TABLE "Facebook" (
     "business_id" UUID NOT NULL,
 
     CONSTRAINT "Facebook_pkey" PRIMARY KEY ("facebook_id")
-);
-
--- CreateTable
-CREATE TABLE "Business" (
-    "business_id" UUID NOT NULL,
-    "business_name" VARCHAR,
-    "admin_id" UUID,
-    "fb_id" VARCHAR,
-    "shopify_id" VARCHAR,
-
-    CONSTRAINT "Business_pkey" PRIMARY KEY ("business_id")
 );
 
 -- CreateTable
@@ -111,18 +131,6 @@ CREATE TABLE "Daily_insight" (
     CONSTRAINT "Daily_insight_pkey" PRIMARY KEY ("created_at","shopify_id")
 );
 
--- CreateTable
-CREATE TABLE "_RoleToUser" (
-    "A" UUID NOT NULL,
-    "B" UUID NOT NULL
-);
-
--- CreateTable
-CREATE TABLE "_BusinessToUser" (
-    "A" UUID NOT NULL,
-    "B" UUID NOT NULL
-);
-
 -- CreateIndex
 CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 
@@ -144,17 +152,17 @@ CREATE UNIQUE INDEX "Order_order_id_key" ON "Order"("order_id");
 -- CreateIndex
 CREATE UNIQUE INDEX "Transaction_transaction_id_key" ON "Transaction"("transaction_id");
 
--- CreateIndex
-CREATE UNIQUE INDEX "_RoleToUser_AB_unique" ON "_RoleToUser"("A", "B");
+-- AddForeignKey
+ALTER TABLE "RoleOnUser" ADD CONSTRAINT "RoleOnUser_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("user_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
--- CreateIndex
-CREATE INDEX "_RoleToUser_B_index" ON "_RoleToUser"("B");
+-- AddForeignKey
+ALTER TABLE "RoleOnUser" ADD CONSTRAINT "RoleOnUser_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "Role"("role_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
--- CreateIndex
-CREATE UNIQUE INDEX "_BusinessToUser_AB_unique" ON "_BusinessToUser"("A", "B");
+-- AddForeignKey
+ALTER TABLE "UserOnBusiness" ADD CONSTRAINT "UserOnBusiness_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("user_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
--- CreateIndex
-CREATE INDEX "_BusinessToUser_B_index" ON "_BusinessToUser"("B");
+-- AddForeignKey
+ALTER TABLE "UserOnBusiness" ADD CONSTRAINT "UserOnBusiness_business_id_fkey" FOREIGN KEY ("business_id") REFERENCES "Business"("business_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Facebook" ADD CONSTRAINT "Facebook_business_id_fkey" FOREIGN KEY ("business_id") REFERENCES "Business"("business_id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -170,16 +178,4 @@ ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_order_id_fkey" FOREIGN KEY
 
 -- AddForeignKey
 ALTER TABLE "Daily_insight" ADD CONSTRAINT "Daily_insight_shopify_id_fkey" FOREIGN KEY ("shopify_id") REFERENCES "Shopify"("shopify_id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "_RoleToUser" ADD CONSTRAINT "_RoleToUser_A_fkey" FOREIGN KEY ("A") REFERENCES "Role"("role_id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "_RoleToUser" ADD CONSTRAINT "_RoleToUser_B_fkey" FOREIGN KEY ("B") REFERENCES "User"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "_BusinessToUser" ADD CONSTRAINT "_BusinessToUser_A_fkey" FOREIGN KEY ("A") REFERENCES "Business"("business_id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "_BusinessToUser" ADD CONSTRAINT "_BusinessToUser_B_fkey" FOREIGN KEY ("B") REFERENCES "User"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
