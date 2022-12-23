@@ -11,7 +11,7 @@ model User {
   user_id  String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name     String  @default("")
   username String  @unique @default("")
-  password String?
+  password String? @db.VarChar
 
   roles      Role[]
   businesses Business[]
@@ -59,10 +59,10 @@ model Facebook {
 
 model Business {
   business_id   String  @id @unique @db.Uuid
-  business_name String?
+  business_name String? @db.VarChar
   admin_id      String? @db.Uuid
-  fb_id         String?
-  shopify_id    String?
+  fb_id         String? @db.VarChar
+  shopify_id    String? @db.VarChar
 
   users     User[]
   facebooks Facebook[]
@@ -79,7 +79,7 @@ model Shopify {
 
   orders         Order[]
   daily_insights Daily_insight[]
-  business       Business        @relation(fields: [business_id], references: [business_id])
+  business       Business        @relation(fields: [business_id], references: [business_id], onDelete: Cascade)
 }
 
 model Order {
@@ -88,11 +88,10 @@ model Order {
   order_payment_status    String?   @db.VarChar
   order_fulfilment_status String?   @db.VarChar
   total_discount_amount   Int?
-  // order_total_price
-  // order_total_received
-  // order_total_refunded
-  // order_net_payment       Int? // total amount received - total amount refunded
-  // channel_definition
+  order_total_price       Int?
+  order_total_received    Int?
+  order_total_refunded    Int?
+  order_net_payment       Int? // total amount received - total amount refunded
 
   shopify_id String  @db.VarChar
   shopify    Shopify @relation(fields: [shopify_id], references: [shopify_id], onDelete: Cascade)
