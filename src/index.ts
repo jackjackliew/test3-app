@@ -552,32 +552,26 @@ const getOrdersWithDate = (date: any) => `query orders($cursor: String) {
     edges {
       node {
         id
-        createdAt
-        cancelledAt
+        createdAt 
         displayFulfillmentStatus
         displayFinancialStatus
-        taxesIncluded
-        discountCodes
         totalDiscountsSet {
-          presentmentMoney {
-            amount
-            currencyCode
-          }
           shopMoney {
             amount
             currencyCode
           }
         }
+        totalPriceSet
+        totalReceviedSet
+        totalRefundedSet
+        netPaymentSet
+        channelInformation
         transactions {
           id
+          createdAt
           kind
           status
-          createdAt
           amountSet {
-            presentmentMoney {
-              amount
-              currencyCode
-            }
             shopMoney {
               amount
               currencyCode
@@ -594,5 +588,6 @@ const getShopId = () => `query {
     id
     name
     url
+    currencyCode
   }
 }`;
