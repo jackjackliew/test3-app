@@ -46,9 +46,7 @@ require('dotenv').config();
 const app = (0, express_1.default)();
 const prisma = new client_1.PrismaClient();
 const API_KEY = process.env.API_KEY ? process.env.API_KEY : '';
-const API_SECRET_KEY = process.env.API_SECRET_KEY
-    ? process.env.API_SECRET_KEY
-    : '';
+const API_SECRET_KEY = process.env.API_SECRET_KEY ? process.env.API_SECRET_KEY : '';
 const SCOPES = process.env.SCOPES ? process.env.SCOPES : '';
 const SHOP = process.env.SHOP ? process.env.SHOP : '';
 const SHOP2 = process.env.SHOP2 ? process.env.SHOP2 : '';
@@ -178,8 +176,7 @@ app.get('/home', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     res.end();
 }));
 app.post('/shopify', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (req.body.shop_name !== undefined &&
-        req.body.shop_access_token !== undefined) {
+    if (req.body.shop_name !== undefined && req.body.shop_access_token !== undefined) {
         shop = req.body.shop_name;
         accessToken = req.body.shop_access_token;
         const client = new shopify_api_1.default.Clients.Graphql(shop, accessToken);
@@ -236,8 +233,7 @@ app.post('/shopify/getorders', (req, res) => __awaiter(void 0, void 0, void 0, f
             const toDay = addOneDay.getDate();
             const toMonth = addOneDay.getMonth() + 1;
             const toYear = addOneDay.getFullYear();
-            req.body.to_created_date =
-                toYear + '-' + toMonth + '-' + ('0' + toDay).slice(-2);
+            req.body.to_created_date = toYear + '-' + toMonth + '-' + ('0' + toDay).slice(-2);
         }
         console.log('shopify get orders' + shop);
         console.log('shopify get orders' + accessToken);
@@ -257,14 +253,7 @@ app.post('/shopify/getorders', (req, res) => __awaiter(void 0, void 0, void 0, f
                 });
                 let nextPage = orders.body.data.orders.pageInfo.hasNextPage;
                 cursor = orders.body.data.orders.pageInfo.endCursor;
-                for (let i = 0; i < orders.body.data.orders.edges.length; i++) {
-                    const order = orders.body.data.orders.edges[i].node;
-                    yield (0, prisma_queries_db_1.insertOrder)(order, storedShopId);
-                    for (let j = 0; j < order.transactions.length; j++) {
-                        console.log(order.transactions[j].createdAt);
-                        yield (0, prisma_queries_db_1.insertTransaction)(order, order.transactions[j]);
-                    }
-                }
+                insertData(orders);
                 if (nextPage === false) {
                     console.log('All data have been retrieved, no more next page');
                     break;
@@ -293,20 +282,9 @@ app.post('/shopify/getorders', (req, res) => __awaiter(void 0, void 0, void 0, f
         console.log('shopify get orders' + accessToken);
         const client = new shopify_api_1.default.Clients.Graphql(shop, accessToken);
         let cursor = null;
-        const now = new Date(Date.now());
-        now.setDate(now.getDate() + 1);
-        const last = new Date(Date.now() - 40 * 24 * 60 * 60 * 1000); //past 40 days
-        console.log('now : ' + now);
-        const fromDay = last.getDate();
-        const fromMonth = last.getMonth() + 1;
-        const fromYear = last.getFullYear();
-        const toDay = now.getDate();
-        const toMonth = now.getMonth() + 1;
-        const toYear = now.getFullYear();
-        req.body.from_created_date =
-            fromYear + '-' + fromMonth + '-' + ('0' + fromDay).slice(-2);
-        req.body.to_created_date =
-            toYear + '-' + toMonth + '-' + ('0' + toDay).slice(-2);
+        let thisDate = yield myDate();
+        req.body.from_created_date = thisDate.fromYear + '-' + thisDate.fromMonth + '-' + ('0' + thisDate.fromDay).slice(-2);
+        req.body.to_created_date = thisDate.toYear + '-' + thisDate.toMonth + '-' + ('0' + thisDate.toDay).slice(-2);
         console.log(req.body.from_created_date);
         console.log(req.body.to_created_date);
         try {
@@ -321,13 +299,7 @@ app.post('/shopify/getorders', (req, res) => __awaiter(void 0, void 0, void 0, f
                 });
                 let nextPage = orders.body.data.orders.pageInfo.hasNextPage;
                 cursor = orders.body.data.orders.pageInfo.endCursor;
-                for (let i = 0; i < orders.body.data.orders.edges.length; i++) {
-                    const order = orders.body.data.orders.edges[i].node;
-                    yield (0, prisma_queries_db_1.insertOrder)(order, storedShopId);
-                    for (let j = 0; j < order.transactions.length; j++) {
-                        yield (0, prisma_queries_db_1.insertTransaction)(order, order.transactions[j]);
-                    }
-                }
+                insertData(orders);
                 if (nextPage === false) {
                     console.log('All data have been retrieved, no more next page');
                     break;
@@ -391,13 +363,7 @@ node_cron_1.default.schedule('*/5 * * * *', () => __awaiter(void 0, void 0, void
                         });
                         let nextPage = orders.body.data.orders.pageInfo.hasNextPage;
                         cursor = orders.body.data.orders.pageInfo.endCursor;
-                        for (let i = 0; i < orders.body.data.orders.edges.length; i++) {
-                            const order = orders.body.data.orders.edges[i].node;
-                            yield (0, prisma_queries_db_1.insertOrder)(order, storedShopId);
-                            for (let j = 0; j < order.transactions.length; j++) {
-                                yield (0, prisma_queries_db_1.insertTransaction)(order, order.transactions[j]);
-                            }
-                        }
+                        insertData(orders);
                         if (nextPage === false) {
                             console.log('All data have been retrieved, no more next page');
                             break;
@@ -442,10 +408,8 @@ app.post('/shopify/getdailytotal', (req, res) => __awaiter(void 0, void 0, void 
         const toDay = now.getDate();
         const toMonth = now.getMonth() + 1;
         const toYear = now.getFullYear();
-        req.body.from_created_date =
-            fromYear + '-' + fromMonth + '-' + ('0' + fromDay).slice(-2);
-        req.body.to_created_date =
-            toYear + '-' + toMonth + '-' + ('0' + toDay).slice(-2);
+        req.body.from_created_date = fromYear + '-' + fromMonth + '-' + ('0' + fromDay).slice(-2);
+        req.body.to_created_date = toYear + '-' + toMonth + '-' + ('0' + toDay).slice(-2);
         console.log('to date: ' + req.body.to_created_date);
         console.log('from date: ' + req.body.from_created_date);
         const getTotalSalesTransactionResults = yield (0, prisma_queries_db_1.getTotalSalesTransaction)(req.body, storedShopId);
@@ -470,35 +434,48 @@ const getOrdersWithDate = (date) => `query orders($cursor: String) {
     edges {
       node {
         id
-        createdAt
-        cancelledAt
+        createdAt 
         displayFulfillmentStatus
         displayFinancialStatus
-        taxesIncluded
-        discountCodes
         totalDiscountsSet {
-          presentmentMoney {
-            amount
-            currencyCode
-          }
           shopMoney {
             amount
-            currencyCode
+          }
+        }
+        totalPriceSet {
+          shopMoney {
+            amount
+          }
+        }
+        totalReceivedSet {
+          shopMoney {
+            amount
+          }
+        }
+        totalRefundedSet {
+          shopMoney {
+            amount
+          }
+        }
+        netPaymentSet {
+          shopMoney {
+            amount
+          }
+        }
+        channelInformation {
+          channelDefinition {
+            channelName
+            subChannelName
           }
         }
         transactions {
           id
+          createdAt
           kind
           status
-          createdAt
           amountSet {
-            presentmentMoney {
-              amount
-              currencyCode
-            }
             shopMoney {
               amount
-              currencyCode
             }
           }
         }
@@ -511,6 +488,28 @@ const getShopId = () => `query {
     id
     name
     url
+    currencyCode
   }
 }`;
+const insertData = (orders) => __awaiter(void 0, void 0, void 0, function* () {
+    for (let i = 0; i < orders.body.data.orders.edges.length; i++) {
+        const order = orders.body.data.orders.edges[i].node;
+        yield (0, prisma_queries_db_1.insertOrder)(order, storedShopId);
+        for (let j = 0; j < order.transactions.length; j++) {
+            yield (0, prisma_queries_db_1.insertTransaction)(order, order.transactions[j]);
+        }
+    }
+});
+const myDate = () => __awaiter(void 0, void 0, void 0, function* () {
+    const now = new Date(Date.now());
+    now.setDate(now.getDate() + 1);
+    const last = new Date(Date.now() - 40 * 24 * 60 * 60 * 1000); //past 40 days
+    const fromDay = last.getDate();
+    const fromMonth = last.getMonth() + 1;
+    const fromYear = last.getFullYear();
+    const toDay = now.getDate();
+    const toMonth = now.getMonth() + 1;
+    const toYear = now.getFullYear();
+    return { now, last, fromDay, fromMonth, fromYear, toDay, toMonth, toYear };
+});
 //# sourceMappingURL=index.js.map

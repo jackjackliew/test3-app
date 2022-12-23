@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getDailyTotalRefunds = exports.insertDailyTotalRefunds = exports.getTotalRefundsTransaction = exports.getDailyTotalSales = exports.insertDailyTotalSales = exports.getTotalSalesTransaction = exports.insertTransaction = exports.getOrderById = exports.insertOrder = exports.insertShop = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
-const insertShop = (shopify, accessToken, business) => __awaiter(void 0, void 0, void 0, function* () {
+const insertShop = (shopify, accessToken, businessId) => __awaiter(void 0, void 0, void 0, function* () {
     const insertShop = yield prisma.shopify.upsert({
         where: {
             shopify_id: shopify.id,
@@ -26,50 +26,57 @@ const insertShop = (shopify, accessToken, business) => __awaiter(void 0, void 0,
             shopify_name: shopify.name,
             shopify_url: shopify.url,
             access_token: accessToken,
-            business_id: business,
+            currency_code: shopify.currencyCode,
+            business_id: businessId,
         },
+    });
+    const updateShopifyIdInBusiness = yield prisma.business.update({
+        where: {
+            business_id: businessId,
+        },
+        data: { shopify_id: shopify.id },
     });
 });
 exports.insertShop = insertShop;
 const insertOrder = (order, shopifyId) => __awaiter(void 0, void 0, void 0, function* () {
     const insertOrder = yield prisma.order.upsert({
         where: {
-            reference_order_id: order.id,
+            order_id: order.id,
         },
         update: {
-            displayfinancialstatus: order.displayFinancialStatus,
-            displayfulfillmentstatus: order.displayFulfillmentStatus,
-            discountcodes: order.discountCodes,
-            totaldiscountsset_presentmentmoney_amount: parseInt(order.totalDiscountsSet.presentmentMoney.amount),
-            totaldiscountsset_presentmentmoney_currencycode: order.totalDiscountsSet.presentmentMoney.currencyCode,
-            totaldiscountsset_shopmoney_amount: parseInt(order.totalDiscountsSet.shopMoney.amount),
-            totaldiscountsset_shopmoney_currencycode: order.totalDiscountsSet.shopMoney.currencyCode,
+            order_payment_status: order.displayFinancialStatus,
+            order_fulfilment_status: order.displayFulfillmentStatus,
+            total_discount_amount: parseInt(order.totalDiscountsSet.shopMoney.amount),
+            order_total_price: parseInt(order.totalPriceSet.shopMoney.amount),
+            order_total_received: parseInt(order.totalReceivedSet.shopMoney.amount),
+            order_total_refunded: parseInt(order.totalRefundedSet.shopMoney.amount),
+            order_net_payment: parseInt(order.netPaymentSet.shopMoney.amount),
         },
         create: {
-            createdat: order.createdAt,
-            displayfinancialstatus: order.displayFinancialStatus,
-            displayfulfillmentstatus: order.displayFulfillmentStatus,
-            discountcodes: order.discountCodes,
-            totaldiscountsset_presentmentmoney_amount: parseInt(order.totalDiscountsSet.presentmentMoney.amount),
-            totaldiscountsset_presentmentmoney_currencycode: order.totalDiscountsSet.presentmentMoney.currencyCode,
-            totaldiscountsset_shopmoney_amount: parseInt(order.totalDiscountsSet.shopMoney.amount),
-            totaldiscountsset_shopmoney_currencycode: order.totalDiscountsSet.shopMoney.currencyCode,
-            reference_order_id: order.id,
+            order_id: order.id,
+            order_created_at: order.createdAt,
+            order_payment_status: order.displayFinancialStatus,
+            order_fulfilment_status: order.displayFulfillmentStatus,
+            total_discount_amount: parseInt(order.totalDiscountsSet.shopMoney.amount),
+            order_total_price: parseInt(order.totalPriceSet.shopMoney.amount),
+            order_total_received: parseInt(order.totalReceivedSet.shopMoney.amount),
+            order_total_refunded: parseInt(order.totalRefundedSet.shopMoney.amount),
+            order_net_payment: parseInt(order.netPaymentSet.shopMoney.amount),
             shopify_id: shopifyId,
         },
     });
     if (insertOrder) {
-        console.log('All orders have been inserted');
+        console.log(`Order has been inserted`);
     }
     else {
         console.log('Insert error');
     }
 });
 exports.insertOrder = insertOrder;
-const getOrderById = (reference_order_id) => __awaiter(void 0, void 0, void 0, function* () {
+const getOrderById = (orderId) => __awaiter(void 0, void 0, void 0, function* () {
     const getOrderById = yield prisma.order.findUnique({
         where: {
-            reference_order_id,
+            order_id: orderId,
         },
     });
     if (getOrderById) {
@@ -83,23 +90,20 @@ exports.getOrderById = getOrderById;
 const insertTransaction = (order, transaction) => __awaiter(void 0, void 0, void 0, function* () {
     const insertTransaction = yield prisma.transaction.upsert({
         where: {
-            reference_transaction_id: transaction.id,
+            transaction_id: transaction.id,
         },
         update: {},
         create: {
-            reference_order_id: order.id,
-            reference_transaction_id: transaction.id,
+            order_id: order.id,
+            transaction_id: transaction.id,
             transaction_created_at: transaction.createdAt,
             transaction_kind: transaction.kind,
             transaction_status: transaction.status,
-            transaction_presentment_amount: parseInt(transaction.amountSet.presentmentMoney.amount),
-            transaction_presentment_currency: transaction.amountSet.presentmentMoney.currencyCode,
             transaction_shop_amount: parseInt(transaction.amountSet.shopMoney.amount),
-            transaction_shop_currency: transaction.amountSet.shopMoney.currencyCode,
         },
     });
     if (insertTransaction) {
-        console.log('All transactions have been inserted');
+        console.log('Transaction have been inserted');
     }
     else {
         console.log('Insert error');
@@ -125,9 +129,9 @@ const getTotalSalesTransaction = (transaction, shopifyId) => __awaiter(void 0, v
             },
         },
         select: {
-            reference_order_id: true,
+            order_id: true,
             transaction_created_at: true,
-            transaction_presentment_amount: true,
+            transaction_shop_amount: true,
         },
         orderBy: {
             transaction_created_at: 'asc',
@@ -135,9 +139,8 @@ const getTotalSalesTransaction = (transaction, shopifyId) => __awaiter(void 0, v
     });
     for (let i = 0; i < getSales.length; i++) {
         console.log(getSales[i]);
-        console.log('this is the order id for the transaction: ' +
-            getSales[i].reference_order_id);
-        let order = yield (0, exports.getOrderById)(getSales[i].reference_order_id);
+        console.log('this is the order id for the transaction: ' + getSales[i].order_id);
+        let order = yield (0, exports.getOrderById)(getSales[i].order_id);
         if ((order === null || order === void 0 ? void 0 : order.shopify_id) === shopifyId) {
             salesDate = getSales[i].transaction_created_at;
             console.log('salesDate: ' + salesDate);
@@ -147,21 +150,18 @@ const getTotalSalesTransaction = (transaction, shopifyId) => __awaiter(void 0, v
                 const year = salesDate.getFullYear();
                 let convertedSalesDate = year + '-' + month + '-' + ('0' + day).slice(-2);
                 if (Object.keys(date).length === 0) {
-                    console.log('if the date object length is 0: ' +
-                        getSales[i].transaction_presentment_amount);
+                    console.log('if the date object length is 0: ' + getSales[i].transaction_shop_amount);
                     console.log('first key: ' + convertedSalesDate);
-                    date[convertedSalesDate] = getSales[i].transaction_presentment_amount;
+                    date[convertedSalesDate] = getSales[i].transaction_shop_amount;
                 }
                 else if (Object.keys(date).length !== 0) {
                     console.log('object key: ' + date.hasOwnProperty(convertedSalesDate));
                     console.log('after first key: ' + convertedSalesDate);
                     if (date.hasOwnProperty(convertedSalesDate)) {
-                        date[convertedSalesDate] +=
-                            getSales[i].transaction_presentment_amount;
+                        date[convertedSalesDate] += getSales[i].transaction_shop_amount;
                     }
                     else {
-                        date[convertedSalesDate] =
-                            getSales[i].transaction_presentment_amount;
+                        date[convertedSalesDate] = getSales[i].transaction_shop_amount;
                     }
                 }
             }
@@ -241,9 +241,9 @@ const getTotalRefundsTransaction = (transaction, shopId) => __awaiter(void 0, vo
             },
         },
         select: {
-            reference_order_id: true,
+            order_id: true,
             transaction_created_at: true,
-            transaction_presentment_amount: true,
+            transaction_shop_amount: true,
         },
         orderBy: {
             transaction_created_at: 'asc',
@@ -251,9 +251,8 @@ const getTotalRefundsTransaction = (transaction, shopId) => __awaiter(void 0, vo
     });
     for (let i = 0; i < getRefunds.length; i++) {
         console.log(getRefunds[i]);
-        console.log('this is the order id for the transaction: ' +
-            getRefunds[i].reference_order_id);
-        let order = yield (0, exports.getOrderById)(getRefunds[i].reference_order_id);
+        console.log('this is the order id for the transaction: ' + getRefunds[i].order_id);
+        let order = yield (0, exports.getOrderById)(getRefunds[i].order_id);
         if ((order === null || order === void 0 ? void 0 : order.shopify_id) === shopId) {
             refundsDate = getRefunds[i].transaction_created_at;
             console.log('salesDate: ' + refundsDate);
@@ -263,22 +262,18 @@ const getTotalRefundsTransaction = (transaction, shopId) => __awaiter(void 0, vo
                 const year = refundsDate.getFullYear();
                 let convertedRefundsDate = year + '-' + month + '-' + ('0' + day).slice(-2);
                 if (Object.keys(date).length === 0) {
-                    console.log('if the date object length is 0: ' +
-                        getRefunds[i].transaction_presentment_amount);
+                    console.log('if the date object length is 0: ' + getRefunds[i].transaction_shop_amount);
                     console.log('first key: ' + convertedRefundsDate);
-                    date[convertedRefundsDate] =
-                        getRefunds[i].transaction_presentment_amount;
+                    date[convertedRefundsDate] = getRefunds[i].transaction_shop_amount;
                 }
                 else if (Object.keys(date).length !== 0) {
                     console.log('object key: ' + date.hasOwnProperty(convertedRefundsDate));
                     console.log('after first key: ' + convertedRefundsDate);
                     if (date.hasOwnProperty(convertedRefundsDate)) {
-                        date[convertedRefundsDate] +=
-                            getRefunds[i].transaction_presentment_amount;
+                        date[convertedRefundsDate] += getRefunds[i].transaction_shop_amount;
                     }
                     else {
-                        date[convertedRefundsDate] =
-                            getRefunds[i].transaction_presentment_amount;
+                        date[convertedRefundsDate] = getRefunds[i].transaction_shop_amount;
                     }
                 }
             }
