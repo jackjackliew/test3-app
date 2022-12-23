@@ -70,11 +70,12 @@ model Business {
 }
 
 model Shopify {
-  shopify_id   String  @id @unique @db.VarChar
-  shopify_name String? @db.VarChar
-  shopify_url  String  @unique @db.VarChar
-  access_token String  @unique @db.VarChar
-  business_id  String  @db.Uuid
+  shopify_id    String  @id @unique @db.VarChar
+  shopify_name  String? @db.VarChar
+  shopify_url   String  @unique @db.VarChar
+  access_token  String  @unique @db.VarChar
+  currency_code String?
+  business_id   String  @db.Uuid
 
   orders         Order[]
   daily_insights Daily_insight[]
@@ -82,33 +83,32 @@ model Shopify {
 }
 
 model Order {
-  createdat                                       DateTime? @db.Timestamp(6)
-  displayfinancialstatus                          String?   @db.VarChar
-  displayfulfillmentstatus                        String?   @db.VarChar
-  discountcodes                                   String[]  @db.VarChar
-  totaldiscountsset_presentmentmoney_amount       Int?
-  totaldiscountsset_presentmentmoney_currencycode String?   @db.VarChar
-  totaldiscountsset_shopmoney_amount              Int?
-  totaldiscountsset_shopmoney_currencycode        String?   @db.VarChar
-  reference_order_id                              String    @id @unique @db.VarChar
-  shopify                                         Shopify   @relation(fields: [shopify_id], references: [shopify_id], onDelete: Cascade)
-  shopify_id                                      String    @db.VarChar
+  order_id                String    @id @unique @db.VarChar
+  order_created_at        DateTime? @db.Timestamp(6)
+  order_payment_status    String?   @db.VarChar
+  order_fulfilment_status String?   @db.VarChar
+  total_discount_amount   Int?
+  // order_total_price
+  // order_total_received
+  // order_total_refunded
+  // order_net_payment       Int? // total amount received - total amount refunded
+  // channel_definition
+
+  shopify_id String  @db.VarChar
+  shopify    Shopify @relation(fields: [shopify_id], references: [shopify_id], onDelete: Cascade)
 
   transactions Transaction[]
 }
 
 model Transaction {
-  reference_transaction_id         String    @id @unique @db.VarChar
-  transaction_created_at           DateTime? @db.Timestamp(6)
-  transaction_kind                 String?   @db.VarChar
-  transaction_status               String?   @db.VarChar
-  transaction_presentment_amount   Int?
-  transaction_presentment_currency String?   @db.VarChar
-  transaction_shop_amount          Int?
-  transaction_shop_currency        String?   @db.VarChar
+  transaction_id          String    @id @unique @db.VarChar
+  transaction_created_at  DateTime? @db.Timestamp(6)
+  transaction_kind        String?   @db.VarChar
+  transaction_status      String?   @db.VarChar
+  transaction_shop_amount Int?
 
-  order              Order  @relation(fields: [reference_order_id], references: [reference_order_id], onDelete: Cascade)
-  reference_order_id String @db.VarChar
+  order    Order  @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
+  order_id String @db.VarChar
 }
 
 model Daily_insight {
