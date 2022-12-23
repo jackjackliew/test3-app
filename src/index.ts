@@ -4,65 +4,56 @@ import Shopify, { ApiVersion, AuthQuery } from '@shopify/shopify-api';
 import cron from 'node-cron';
 import bodyParser from 'body-parser';
 import { PrismaClient } from '@prisma/client';
-import {
-  insertOrder,
-  insertTransaction,
-  getTotalSalesTransaction,
-  getDailyTotalSales,
-  getTotalRefundsTransaction,
-  getDailyTotalRefunds,
-  insertShop,
-} from './prisma_queries_db';
+import { insertShopify, insertOrder, insertTransaction } from './shopify/insertShopifyData';
+import { getDailyTotalRefunds, getDailyTotalSales, getTotalRefundsTransaction, getTotalSalesTransaction } from './shopify/getShopifyData';
+import { getShopify, getOrdersWithDate } from './shopify/query';
+import { Business } from './business/insertBusiness';
+import { shopifySetup } from './shopify/shopifySetup';
 require('dotenv').config();
 
 const app = express();
 const prisma = new PrismaClient();
 
-const API_KEY = process.env.API_KEY ? process.env.API_KEY : '';
-const API_SECRET_KEY = process.env.API_SECRET_KEY ? process.env.API_SECRET_KEY : '';
-const SCOPES = process.env.SCOPES ? process.env.SCOPES : '';
-const SHOP = process.env.SHOP ? process.env.SHOP : '';
-const SHOP2 = process.env.SHOP2 ? process.env.SHOP2 : '';
-const HOST = process.env.HOST ? process.env.HOST : '';
-
-const { HOST_SCHEME } = process.env;
 let shop: any;
 let accessToken: any;
 let storedShopId: any;
-// let shopName: any;
 
 interface MyResponseBodyType {
   data: any;
 }
 
-let business = '12345612345612345612345612345612';
+// Mocking business
+let business = new Business('12345612345612345612345612345612');
 
-Shopify.Context.initialize({
-  API_KEY,
-  API_SECRET_KEY,
-  SCOPES: [SCOPES],
-  HOST_NAME: HOST.replace(/https?:\/\//, ''),
-  HOST_SCHEME,
-  IS_EMBEDDED_APP: false,
-  API_VERSION: ApiVersion.October22, // all supported versions are available, as well as "unstable" and "unversioned"
-});
-// Storing the currently active shops in memory will force them to re-login when your server restarts. You should
-// persist this object in your app.
-const ACTIVE_SHOPIFY_SHOPS: { [key: string]: string | undefined } = {};
-
-// the rest of the example code goes here
+let currentActiveShopify = shopifySetup();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get('/', async (req, res) => {
-  console.log('this is active shopify scopes : ' + ACTIVE_SHOPIFY_SHOPS[shop]);
+  const businessList = await prisma.business.findMany({
+    select: {
+      business_name: true,
+    },
+  });
+
+  let options = '';
+  for (let i = 0; i < businessList.length; i++) {
+    options += '<option>' + businessList[i].business_name + '</option>';
+  }
+  console.log(options);
+  console.log(businessList);
+
   //  This shop hasn't been seen yet, go through OAuth to create a session
-  if (ACTIVE_SHOPIFY_SHOPS[shop] === undefined) {
+  if (currentActiveShopify[shop] === undefined) {
     res.send(
       `<html>
         <body>
-          <p>Welcome! kindly insert your shop name</p>
+          <p>Choose your business</p>
           <form action="/login" method="get">
+            <label for="business_name"> Please choose your business: </label>
+            <select name="business_name" id="business_id">
+              ${options}
+              </select>
             <label for="shop_name">Enter your shop name with (.myshopify.com) :</label>
             <input type="text" id="shop_name" name="shop_name" required>
             <button type="submit">Submit</button>
@@ -90,13 +81,13 @@ app.get('/shopify/success', async (req, res) => {
   try {
     const shopId: any = await client.query<MyResponseBodyType>({
       data: {
-        query: getShopId(),
+        query: getShopify(),
       },
     });
 
     console.log(shopId.body.data.shop);
     storedShopId = shopId.body.data.shop.id;
-    await insertShop(shopId.body.data.shop, accessToken, business);
+    await insertShopify(shopId.body.data.shop, accessToken, business, prisma);
 
     res.send(
       `<html>
@@ -146,7 +137,7 @@ app.get('/auth/callback', async (req, res) => {
     const session = await Shopify.Auth.validateAuthCallback(req, res, req.query as unknown as AuthQuery); // req.query must be cast to unkown and then AuthQuery in order to be accepted
 
     console.log(session);
-    ACTIVE_SHOPIFY_SHOPS[shop] = session.scope;
+    currentActiveShopify[shop] = session.scope;
     accessToken = session.accessToken;
     console.log('this is the shop name : ' + shop);
     console.log('this is the access token : ' + accessToken);
@@ -187,13 +178,13 @@ app.post('/shopify', async (req, res) => {
     try {
       const shopId: any = await client.query<MyResponseBodyType>({
         data: {
-          query: getShopId(),
+          query: getShopify(),
         },
       });
 
       console.log(shopId.body.data.shop);
       storedShopId = shopId.body.data.shop.id;
-      await insertShop(shopId.body.data.shop, accessToken, business);
+      await insertShopify(shopId.body.data.shop, accessToken, business, prisma);
 
       res.send(
         `<html>
@@ -358,7 +349,7 @@ cron.schedule('*/5 * * * *', async () => {
     try {
       const shopId: any = await client.query<MyResponseBodyType>({
         data: {
-          query: getShopId(),
+          query: getShopify(),
         },
       });
       storedShopId = shopId.body.data.shop.id;
@@ -421,11 +412,11 @@ cron.schedule('*/5 * * * *', async () => {
 
 app.post('/shopify/getdailytotal', async (req, res) => {
   if (req.body.from_created_date !== '' || req.body.to_created_date !== '') {
-    const getTotalSalesTransactionResults = await getTotalSalesTransaction(req.body, storedShopId);
-    const getTotalRefundsTransactionResults = await getTotalRefundsTransaction(req.body, storedShopId);
+    const getTotalSalesTransactionResults = await getTotalSalesTransaction(req.body, storedShopId, prisma);
+    const getTotalRefundsTransactionResults = await getTotalRefundsTransaction(req.body, storedShopId, prisma);
     if (getTotalSalesTransactionResults && getTotalRefundsTransactionResults) {
-      const getDailyTotalSalesResults = await getDailyTotalSales(req.body, storedShopId);
-      const getDailyTotalRefundsResults = await getDailyTotalRefunds(req.body, storedShopId);
+      const getDailyTotalSalesResults = await getDailyTotalSales(req.body, storedShopId, prisma);
+      const getDailyTotalRefundsResults = await getDailyTotalRefunds(req.body, storedShopId, prisma);
       console.log(getDailyTotalSalesResults);
       console.log(getDailyTotalRefundsResults);
     }
@@ -443,11 +434,11 @@ app.post('/shopify/getdailytotal', async (req, res) => {
     req.body.to_created_date = toYear + '-' + toMonth + '-' + ('0' + toDay).slice(-2);
     console.log('to date: ' + req.body.to_created_date);
     console.log('from date: ' + req.body.from_created_date);
-    const getTotalSalesTransactionResults = await getTotalSalesTransaction(req.body, storedShopId);
-    const getTotalRefundsTransactionResults = await getTotalRefundsTransaction(req.body, storedShopId);
+    const getTotalSalesTransactionResults = await getTotalSalesTransaction(req.body, storedShopId, prisma);
+    const getTotalRefundsTransactionResults = await getTotalRefundsTransaction(req.body, storedShopId, prisma);
     if (getTotalSalesTransactionResults && getTotalRefundsTransactionResults) {
-      const getDailyTotalSalesResults = await getDailyTotalSales(req.body, storedShopId);
-      const getDailyTotalRefundsResults = await getDailyTotalRefunds(req.body, storedShopId);
+      const getDailyTotalSalesResults = await getDailyTotalSales(req.body, storedShopId, prisma);
+      const getDailyTotalRefundsResults = await getDailyTotalRefunds(req.body, storedShopId, prisma);
       console.log(getDailyTotalSalesResults);
       console.log(getDailyTotalRefundsResults);
     }
@@ -458,80 +449,12 @@ app.listen(3000, () => {
   console.log('your app is now listening on port 3000');
 });
 
-const getOrdersWithDate = (date: any) => `query orders($cursor: String) {
-  orders(first: 50, query: "created_at:>=${date.from_created_date} created_at:<${date.to_created_date}", after: $cursor) {
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
-    edges {
-      node {
-        id
-        createdAt 
-        displayFulfillmentStatus
-        displayFinancialStatus
-        totalDiscountsSet {
-          shopMoney {
-            amount
-          }
-        }
-        totalPriceSet {
-          shopMoney {
-            amount
-          }
-        }
-        totalReceivedSet {
-          shopMoney {
-            amount
-          }
-        }
-        totalRefundedSet {
-          shopMoney {
-            amount
-          }
-        }
-        netPaymentSet {
-          shopMoney {
-            amount
-          }
-        }
-        channelInformation {
-          channelDefinition {
-            channelName
-            subChannelName
-          }
-        }
-        transactions {
-          id
-          createdAt
-          kind
-          status
-          amountSet {
-            shopMoney {
-              amount
-            }
-          }
-        }
-      }
-    }
-  }
-}`;
-
-const getShopId = () => `query {
-  shop {
-    id
-    name
-    url
-    currencyCode
-  }
-}`;
-
 const insertData = async (orders: any): Promise<void> => {
   for (let i = 0; i < orders.body.data.orders.edges.length; i++) {
     const order = orders.body.data.orders.edges[i].node;
-    await insertOrder(order, storedShopId);
+    await insertOrder(order, storedShopId, prisma);
     for (let j = 0; j < order.transactions.length; j++) {
-      await insertTransaction(order, order.transactions[j]);
+      await insertTransaction(order, order.transactions[j], prisma);
     }
   }
 };
