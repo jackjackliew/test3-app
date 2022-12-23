@@ -4,7 +4,6 @@ import Shopify, { ApiVersion, AuthQuery } from '@shopify/shopify-api';
 import cron from 'node-cron';
 import bodyParser from 'body-parser';
 import { PrismaClient } from '@prisma/client';
-import { getTotalSales30Days, getTotalRefund30Days, getTotalPending30Days } from './queries';
 import {
   insertOrder,
   insertTransaction,
@@ -13,7 +12,6 @@ import {
   getTotalRefundsTransaction,
   getDailyTotalRefunds,
   insertShop,
-  insertDailyTotalRefunds,
 } from './prisma_queries_db';
 require('dotenv').config();
 
