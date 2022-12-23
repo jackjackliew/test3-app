@@ -2,11 +2,7 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export const insertShop = async (
-  shopify: any,
-  accessToken: any,
-  business: any
-) => {
+export const insertShop = async (shopify: any, accessToken: any, businessId: any) => {
   const insertShop = await prisma.shopify.upsert({
     where: {
       shopify_id: shopify.id,
@@ -20,61 +16,57 @@ export const insertShop = async (
       shopify_name: shopify.name,
       shopify_url: shopify.url,
       access_token: accessToken,
-      business_id: business,
+      currency_code: shopify.currencyCode,
+      business_id: businessId,
     },
+  });
+
+  const updateShopifyIdInBusiness = await prisma.business.update({
+    where: {
+      business_id: businessId,
+    },
+    data: { shopify_id: shopify.id },
   });
 };
 
 export const insertOrder = async (order: any, shopifyId: any) => {
   const insertOrder = await prisma.order.upsert({
     where: {
-      reference_order_id: order.id,
+      order_id: order.id,
     },
     update: {
-      displayfinancialstatus: order.displayFinancialStatus,
-      displayfulfillmentstatus: order.displayFulfillmentStatus,
-      discountcodes: order.discountCodes,
-      totaldiscountsset_presentmentmoney_amount: parseInt(
-        order.totalDiscountsSet.presentmentMoney.amount
-      ),
-      totaldiscountsset_presentmentmoney_currencycode:
-        order.totalDiscountsSet.presentmentMoney.currencyCode,
-      totaldiscountsset_shopmoney_amount: parseInt(
-        order.totalDiscountsSet.shopMoney.amount
-      ),
-      totaldiscountsset_shopmoney_currencycode:
-        order.totalDiscountsSet.shopMoney.currencyCode,
+      order_payment_status: order.displayFinancialStatus,
+      order_fulfilment_status: order.displayFulfillmentStatus,
+      total_discount_amount: parseInt(order.totalDiscountsSet.shopMoney.amount),
+      order_total_price: parseInt(order.totalPriceSet.shopMoney.amount),
+      order_total_received: parseInt(order.totalReceivedSet.shopMoney.amount),
+      order_total_refunded: parseInt(order.totalRefundedSet.shopMoney.amount),
+      order_net_payment: parseInt(order.netPaymentSet.shopMoney.amount),
     },
     create: {
-      createdat: order.createdAt,
-      displayfinancialstatus: order.displayFinancialStatus,
-      displayfulfillmentstatus: order.displayFulfillmentStatus,
-      discountcodes: order.discountCodes,
-      totaldiscountsset_presentmentmoney_amount: parseInt(
-        order.totalDiscountsSet.presentmentMoney.amount
-      ),
-      totaldiscountsset_presentmentmoney_currencycode:
-        order.totalDiscountsSet.presentmentMoney.currencyCode,
-      totaldiscountsset_shopmoney_amount: parseInt(
-        order.totalDiscountsSet.shopMoney.amount
-      ),
-      totaldiscountsset_shopmoney_currencycode:
-        order.totalDiscountsSet.shopMoney.currencyCode,
-      reference_order_id: order.id,
+      order_id: order.id,
+      order_created_at: order.createdAt,
+      order_payment_status: order.displayFinancialStatus,
+      order_fulfilment_status: order.displayFulfillmentStatus,
+      total_discount_amount: parseInt(order.totalDiscountsSet.shopMoney.amount),
+      order_total_price: parseInt(order.totalPriceSet.shopMoney.amount),
+      order_total_received: parseInt(order.totalReceivedSet.shopMoney.amount),
+      order_total_refunded: parseInt(order.totalRefundedSet.shopMoney.amount),
+      order_net_payment: parseInt(order.netPaymentSet.shopMoney.amount),
       shopify_id: shopifyId,
     },
   });
   if (insertOrder) {
-    console.log('All orders have been inserted');
+    console.log(`Order has been inserted`);
   } else {
     console.log('Insert error');
   }
 };
 
-export const getOrderById = async (reference_order_id: any) => {
+export const getOrderById = async (orderId: any) => {
   const getOrderById = await prisma.order.findUnique({
     where: {
-      reference_order_id,
+      order_id: orderId,
     },
   });
   if (getOrderById) {
@@ -87,35 +79,26 @@ export const getOrderById = async (reference_order_id: any) => {
 export const insertTransaction = async (order: any, transaction: any) => {
   const insertTransaction = await prisma.transaction.upsert({
     where: {
-      reference_transaction_id: transaction.id,
+      transaction_id: transaction.id,
     },
     update: {},
     create: {
-      reference_order_id: order.id,
-      reference_transaction_id: transaction.id,
+      order_id: order.id,
+      transaction_id: transaction.id,
       transaction_created_at: transaction.createdAt,
       transaction_kind: transaction.kind,
       transaction_status: transaction.status,
-      transaction_presentment_amount: parseInt(
-        transaction.amountSet.presentmentMoney.amount
-      ),
-      transaction_presentment_currency:
-        transaction.amountSet.presentmentMoney.currencyCode,
       transaction_shop_amount: parseInt(transaction.amountSet.shopMoney.amount),
-      transaction_shop_currency: transaction.amountSet.shopMoney.currencyCode,
     },
   });
   if (insertTransaction) {
-    console.log('All transactions have been inserted');
+    console.log('Transaction have been inserted');
   } else {
     console.log('Insert error');
   }
 };
 
-export const getTotalSalesTransaction = async (
-  transaction: any,
-  shopifyId: any
-) => {
+export const getTotalSalesTransaction = async (transaction: any, shopifyId: any) => {
   let date: any = {};
   console.log(transaction.from_created_date);
   console.log(transaction.to_created_date);
@@ -134,9 +117,9 @@ export const getTotalSalesTransaction = async (
       },
     },
     select: {
-      reference_order_id: true,
+      order_id: true,
       transaction_created_at: true,
-      transaction_presentment_amount: true,
+      transaction_shop_amount: true,
     },
     orderBy: {
       transaction_created_at: 'asc',
@@ -144,11 +127,8 @@ export const getTotalSalesTransaction = async (
   });
   for (let i = 0; i < getSales.length; i++) {
     console.log(getSales[i]);
-    console.log(
-      'this is the order id for the transaction: ' +
-        getSales[i].reference_order_id
-    );
-    let order = await getOrderById(getSales[i].reference_order_id);
+    console.log('this is the order id for the transaction: ' + getSales[i].order_id);
+    let order = await getOrderById(getSales[i].order_id);
     if (order?.shopify_id === shopifyId) {
       salesDate = getSales[i].transaction_created_at;
       console.log('salesDate: ' + salesDate);
@@ -156,24 +136,18 @@ export const getTotalSalesTransaction = async (
         const day = salesDate.getDate();
         const month = salesDate.getMonth() + 1;
         const year = salesDate.getFullYear();
-        let convertedSalesDate =
-          year + '-' + month + '-' + ('0' + day).slice(-2);
+        let convertedSalesDate = year + '-' + month + '-' + ('0' + day).slice(-2);
         if (Object.keys(date).length === 0) {
-          console.log(
-            'if the date object length is 0: ' +
-              getSales[i].transaction_presentment_amount
-          );
+          console.log('if the date object length is 0: ' + getSales[i].transaction_shop_amount);
           console.log('first key: ' + convertedSalesDate);
-          date[convertedSalesDate] = getSales[i].transaction_presentment_amount;
+          date[convertedSalesDate] = getSales[i].transaction_shop_amount;
         } else if (Object.keys(date).length !== 0) {
           console.log('object key: ' + date.hasOwnProperty(convertedSalesDate));
           console.log('after first key: ' + convertedSalesDate);
           if (date.hasOwnProperty(convertedSalesDate)) {
-            date[convertedSalesDate] +=
-              getSales[i].transaction_presentment_amount;
+            date[convertedSalesDate] += getSales[i].transaction_shop_amount;
           } else {
-            date[convertedSalesDate] =
-              getSales[i].transaction_presentment_amount;
+            date[convertedSalesDate] = getSales[i].transaction_shop_amount;
           }
         }
       }
@@ -189,11 +163,7 @@ export const getTotalSalesTransaction = async (
   return getSales;
 };
 
-export const insertDailyTotalSales = async (
-  date: any,
-  totalSales: any,
-  shopifyId: any
-) => {
+export const insertDailyTotalSales = async (date: any, totalSales: any, shopifyId: any) => {
   const insertTotalSales = await prisma.daily_insight.upsert({
     where: {
       created_at_shopify_id: {
@@ -237,10 +207,7 @@ export const getDailyTotalSales = async (date: any, shopifyId: any) => {
   return getTotalSales;
 };
 
-export const getTotalRefundsTransaction = async (
-  transaction: any,
-  shopId: any
-) => {
+export const getTotalRefundsTransaction = async (transaction: any, shopId: any) => {
   let date: any = {};
   console.log(transaction.from_created_date);
   console.log(transaction.to_created_date);
@@ -259,9 +226,9 @@ export const getTotalRefundsTransaction = async (
       },
     },
     select: {
-      reference_order_id: true,
+      order_id: true,
       transaction_created_at: true,
-      transaction_presentment_amount: true,
+      transaction_shop_amount: true,
     },
     orderBy: {
       transaction_created_at: 'asc',
@@ -269,11 +236,8 @@ export const getTotalRefundsTransaction = async (
   });
   for (let i = 0; i < getRefunds.length; i++) {
     console.log(getRefunds[i]);
-    console.log(
-      'this is the order id for the transaction: ' +
-        getRefunds[i].reference_order_id
-    );
-    let order = await getOrderById(getRefunds[i].reference_order_id);
+    console.log('this is the order id for the transaction: ' + getRefunds[i].order_id);
+    let order = await getOrderById(getRefunds[i].order_id);
     if (order?.shopify_id === shopId) {
       refundsDate = getRefunds[i].transaction_created_at;
       console.log('salesDate: ' + refundsDate);
@@ -281,27 +245,18 @@ export const getTotalRefundsTransaction = async (
         const day = refundsDate.getDate();
         const month = refundsDate.getMonth() + 1;
         const year = refundsDate.getFullYear();
-        let convertedRefundsDate =
-          year + '-' + month + '-' + ('0' + day).slice(-2);
+        let convertedRefundsDate = year + '-' + month + '-' + ('0' + day).slice(-2);
         if (Object.keys(date).length === 0) {
-          console.log(
-            'if the date object length is 0: ' +
-              getRefunds[i].transaction_presentment_amount
-          );
+          console.log('if the date object length is 0: ' + getRefunds[i].transaction_shop_amount);
           console.log('first key: ' + convertedRefundsDate);
-          date[convertedRefundsDate] =
-            getRefunds[i].transaction_presentment_amount;
+          date[convertedRefundsDate] = getRefunds[i].transaction_shop_amount;
         } else if (Object.keys(date).length !== 0) {
-          console.log(
-            'object key: ' + date.hasOwnProperty(convertedRefundsDate)
-          );
+          console.log('object key: ' + date.hasOwnProperty(convertedRefundsDate));
           console.log('after first key: ' + convertedRefundsDate);
           if (date.hasOwnProperty(convertedRefundsDate)) {
-            date[convertedRefundsDate] +=
-              getRefunds[i].transaction_presentment_amount;
+            date[convertedRefundsDate] += getRefunds[i].transaction_shop_amount;
           } else {
-            date[convertedRefundsDate] =
-              getRefunds[i].transaction_presentment_amount;
+            date[convertedRefundsDate] = getRefunds[i].transaction_shop_amount;
           }
         }
       }
@@ -317,11 +272,7 @@ export const getTotalRefundsTransaction = async (
   return getRefunds;
 };
 
-export const insertDailyTotalRefunds = async (
-  date: any,
-  totalRefunds: any,
-  shopifyId: any
-) => {
+export const insertDailyTotalRefunds = async (date: any, totalRefunds: any, shopifyId: any) => {
   const insertTotalRefunds = await prisma.daily_insight.upsert({
     where: {
       created_at_shopify_id: {
