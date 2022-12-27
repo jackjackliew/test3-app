@@ -36,7 +36,7 @@ model RoleOnUser {
 }
 
 model Business {
-  business_id   String  @id @unique @db.Uuid
+  business_id   String  @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   business_name String? @db.VarChar
   admin_id      String? @db.Uuid
   fb_id         String? @db.VarChar
@@ -102,6 +102,7 @@ model Shopify {
   orders         Order[]
   daily_insights Daily_insight[]
   business       Business        @relation(fields: [business_id], references: [business_id], onDelete: Cascade)
+  Shopify_app    Shopify_app[]
 }
 
 model Order {
@@ -140,4 +141,14 @@ model Daily_insight {
   shopify_id           String   @db.VarChar
 
   @@id([created_at, shopify_id])
+}
+
+model Shopify_app {
+  shopify_app_id             String  @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  shopify_app_name           String? @db.VarChar
+  shopify_app_api_key        String? @db.VarChar
+  shopify_app_api_secret_key String? @db.VarChar
+
+  shopify_id String  @db.VarChar
+  shopify    Shopify @relation(fields: [shopify_id], references: [shopify_id], onDelete: Cascade)
 }
