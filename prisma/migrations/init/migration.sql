@@ -131,6 +131,17 @@ CREATE TABLE "Daily_insight" (
     CONSTRAINT "Daily_insight_pkey" PRIMARY KEY ("created_at","shopify_id")
 );
 
+-- CreateTable
+CREATE TABLE "Shopify_app" (
+    "shopify_app_id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "shopify_app_name" VARCHAR,
+    "shopify_app_api_key" VARCHAR,
+    "shopify_app_api_secret_key" VARCHAR,
+    "shopify_id" VARCHAR NOT NULL,
+
+    CONSTRAINT "Shopify_app_pkey" PRIMARY KEY ("shopify_app_id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 
@@ -151,6 +162,9 @@ CREATE UNIQUE INDEX "Order_order_id_key" ON "Order"("order_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Transaction_transaction_id_key" ON "Transaction"("transaction_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Shopify_app_shopify_app_id_key" ON "Shopify_app"("shopify_app_id");
 
 -- AddForeignKey
 ALTER TABLE "RoleOnUser" ADD CONSTRAINT "RoleOnUser_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("user_id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -178,4 +192,7 @@ ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_order_id_fkey" FOREIGN KEY
 
 -- AddForeignKey
 ALTER TABLE "Daily_insight" ADD CONSTRAINT "Daily_insight_shopify_id_fkey" FOREIGN KEY ("shopify_id") REFERENCES "Shopify"("shopify_id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Shopify_app" ADD CONSTRAINT "Shopify_app_shopify_id_fkey" FOREIGN KEY ("shopify_id") REFERENCES "Shopify"("shopify_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
