@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDailyTotalRefunds = exports.getTotalRefundsTransaction = exports.getDailyTotalSales = exports.getTotalSalesTransaction = exports.getOrderById = void 0;
+exports.getOrderCount = exports.getDailyTotalRefunds = exports.getTotalRefundsTransaction = exports.getDailyTotalSales = exports.getTotalSalesTransaction = exports.getOrderById = void 0;
 const insertShopifyData_1 = require("./insertShopifyData");
 const getOrderById = (orderId, prisma) => __awaiter(void 0, void 0, void 0, function* () {
     const getOrderById = yield prisma.order.findUnique({
@@ -199,4 +199,18 @@ const getDailyTotalRefunds = (date, shopifyId, prisma) => __awaiter(void 0, void
     return getTotalRefunds;
 });
 exports.getDailyTotalRefunds = getDailyTotalRefunds;
+const getOrderCount = (order, shopifyId, prisma) => __awaiter(void 0, void 0, void 0, function* () {
+    let date = {};
+    const getOrderCount = yield prisma.order.findMany({
+        where: {
+            order_created_at: {
+                gte: new Date(order.from_created_date),
+                lt: new Date(order.to_created_date),
+            },
+            shopify_id: shopifyId,
+        },
+    });
+    for (let i = 0; i < getOrderCount.length; i++) { }
+});
+exports.getOrderCount = getOrderCount;
 //# sourceMappingURL=getShopifyData.js.map
