@@ -75,6 +75,23 @@ export const insertOrder = async (order: any, shopifyId: any) => {
   }
 };
 
+export const getOrderCount = async (order: any, shopifyId: any) => {
+  let date: any = {};
+  const getOrderCount = await prisma.order.findMany({
+    where: {
+      order_created_at: {
+        gte: new Date(order.from_created_date),
+        lt: new Date(order.to_created_date),
+      },
+      shopify_id: shopifyId,
+    },
+  });
+
+  for(let i = 0; i < getOrderCount.length; i++) {
+
+  }
+}
+
 export const getOrderById = async (orderId: any) => {
   const getOrderById = await prisma.order.findUnique({
     where: {
