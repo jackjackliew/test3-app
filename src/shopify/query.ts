@@ -35,12 +35,6 @@ export const getOrdersWithDate = (date: any) => `query orders($cursor: String) {
               amount
             }
           }
-          channelInformation {
-            channelDefinition {
-              channelName
-              subChannelName
-            }
-          }
           transactions {
             id
             createdAt
@@ -59,7 +53,6 @@ export const getOrdersWithDate = (date: any) => `query orders($cursor: String) {
 
 export const getShopify = () => `query {
     shop {
-      id
       name
       url
       currencyCode
