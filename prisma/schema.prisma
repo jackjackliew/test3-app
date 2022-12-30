@@ -8,20 +8,24 @@ datasource db {
 }
 
 model User {
-  user_id  String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name     String  @default("")
-  username String  @unique @default("")
-  password String? @db.VarChar
+  user_id           String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_display_name String  @default("")
+  username          String  @unique @default("")
+  password          String? @db.VarChar
 
   userOnBusiness UserOnBusiness[]
 }
 
 model Business {
   business_id   String  @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  business_name String? @db.VarChar
+  business_name String? @unique @db.VarChar
 
-  userOnBusiness UserOnBusiness[]
-  shopify        Shopify[]
+  userOnBusiness    UserOnBusiness[]
+  shopify           Shopify[]
+  BusinessDailyData BusinessDailyData[]
+  Facebook          Facebook[]
+  ShopifyDailyData  ShopifyDailyData[]
+  FacebookDailyData FacebookDailyData[]
 }
 
 model UserOnBusiness {
@@ -30,63 +34,114 @@ model UserOnBusiness {
   business    Business @relation(fields: [business_id], references: [business_id])
   business_id String   @db.Uuid
   role        String   @db.VarChar
-  assignedAt  DateTime @default(now())
-  assignedBy  String
 
   @@id([user_id, business_id])
 }
 
+model BusinessDailyData {
+  business                        Business @relation(fields: [business_id], references: [business_id])
+  business_id                     String   @db.Uuid
+  date                            DateTime @db.Timestamp(6)
+  business_total_sales            Int?
+  business_total_orders           Int?
+  business_average_sales_order    Int?
+  business_total_reach            Int?
+  business_ads_spent              Int?
+  business_average_cost_per_reach Int?
+
+  @@id([business_id, date])
+}
+
 model Shopify {
   shopify_id             String  @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  business_id            String  @db.Uuid
+  shopify_url            String  @unique @db.VarChar
   shopify_api_key        String? @db.VarChar
   shopify_api_secret_key String? @db.VarChar
   shopify_merchant_link  String? @db.VarChar
+  shopify_access_token   String? @unique @db.VarChar
   shopify_name           String? @db.VarChar
-  shopify_url            String  @unique @db.VarChar
-  access_token           String? @unique @db.VarChar
   currency_code          String?
 
-  orders         Order[]
-  daily_insights Daily_insight[]
+  created_at DateTime @db.Timestamp(6)
+  updated_at DateTime @db.Timestamp(6)
+  deleted_at DateTime @db.Timestamp(6)
+
+  shopify_daily_data ShopifyDailyData[]
+
+  business           Business             @relation(fields: [business_id], references: [business_id], onDelete: Cascade)
+  ShopifyTransaction ShopifyTransaction[]
+
+  @@unique([business_id, shopify_url]) // COMPOSITE KEY
+}
+
+model ShopifyDailyData {
+  date                        DateTime @db.Timestamp(6)
+  shopify_id                  String   @db.Uuid
+  shopify_total_order         Int?
+  shopify_total_sales         Int?
+  shopify_total_refund        Int?
+  shopify_average_order_sales Int?
+  business_id                 String   @db.Uuid
+
+  shopify  Shopify  @relation(fields: [shopify_id], references: [shopify_id], onDelete: Cascade)
+  business Business @relation(fields: [business_id], references: [business_id])
+
+  @@id([date, shopify_id]) // COMPOSITE KEY
+}
+
+model ShopifyTransaction {
+  shopify_transaction_id          String    @id @unique @db.VarChar
+  shopify_transaction_created_at  DateTime? @db.Timestamp(6)
+  shopify_transaction_kind        String?   @db.VarChar
+  shopify_transaction_status      String?   @db.VarChar
+  shopify_transaction_shop_amount Int?
+  shopify_order_id                String    @db.VarChar
+  shopify_id                      String    @db.Uuid
+
+  shopify Shopify @relation(fields: [shopify_id], references: [shopify_id], onDelete: Cascade)
+}
+
+model Facebook {
+  facebook_id    String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  facebook_name  String
+  facebook_token String
+  facebook_code  String
+
+  created_at DateTime @db.Timestamp(6)
+  updated_at DateTime @db.Timestamp(6)
+  deleted_at DateTime @db.Timestamp(6)
 
   business    Business @relation(fields: [business_id], references: [business_id], onDelete: Cascade)
   business_id String   @db.Uuid
 }
 
-model Daily_insight {
-  created_at           DateTime @db.Timestamp(6)
-  total_sales_amount   Int?
-  total_refunds_amount Int?
-  shopify              Shopify  @relation(fields: [shopify_id], references: [shopify_id], onDelete: Cascade)
-  shopify_id           String   @db.Uuid
+model FacebookDailyData {
+  date                                       DateTime @db.Date
+  facebook_id                                String   @db.Uuid
+  facebook_reach                             Decimal? @db.Decimal()
+  facebook_impression                        Decimal? @db.Decimal()
+  facebook_frequency                         Decimal? @db.Decimal()
+  facebook_amount_spent                      Decimal? @db.Decimal()
+  facebook_cpm                               Decimal? @db.Decimal()
+  facebook_outbound_clicks_ctr               Decimal? @db.Decimal()
+  facebook_view_content                      Decimal? @db.Decimal()
+  facebook_cost_per_view_content             Decimal? @db.Decimal()
+  facebook_add_to_cart                       Decimal? @db.Decimal()
+  facebook_cost_per_add_to_cart              Decimal? @db.Decimal()
+  facebook_initiate_checkout                 Decimal? @db.Decimal()
+  facebook_cost_per_initiate_checkout        Decimal? @db.Decimal()
+  facebook_purchase                          Decimal? @db.Decimal()
+  facebook_website_purchase                  Decimal? @db.Decimal()
+  facebook_offline_purcase                   Decimal? @db.Decimal()
+  facebook_cost_per_purchase                 Decimal? @db.Decimal()
+  facebook_purchase_conversion_value         Decimal? @db.Decimal()
+  facebook_website_purchase_conversion_value Decimal? @db.Decimal()
+  facebook_offline_purchase_conversion_value Decimal? @db.Decimal()
+  facebook_purchase_roas                     Decimal? @db.Decimal()
 
-  @@id([created_at, shopify_id])
-}
+  business    Business @relation(fields: [business_id], references: [business_id], onDelete: Cascade)
+  business_id String   @db.Uuid
 
-model Order {
-  order_id                String    @id @unique @db.VarChar
-  order_created_at        DateTime? @db.Timestamp(6)
-  order_payment_status    String?   @db.VarChar
-  order_fulfilment_status String?   @db.VarChar
-  total_discount_amount   Int?
-  order_total_price       Int?
-  order_total_received    Int?
-  order_total_refunded    Int?
-  order_net_payment       Int? // total amount received - total amount refunded
-
-  shopify_id String  @db.Uuid
-  shopify    Shopify @relation(fields: [shopify_id], references: [shopify_id], onDelete: Cascade)
-
-  transactions Transaction[]
-}
-
-model Transaction {
-  transaction_id          String    @id @unique @db.VarChar
-  transaction_created_at  DateTime? @db.Timestamp(6)
-  transaction_kind        String?   @db.VarChar
-  transaction_status      String?   @db.VarChar
-  transaction_shop_amount Int?
-
-  order    Order  @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
-  order_id String @db.VarChar
+  @@id([date, facebook_id])
 }

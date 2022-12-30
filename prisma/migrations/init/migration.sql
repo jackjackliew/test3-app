@@ -1,7 +1,7 @@
 -- CreateTable
 CREATE TABLE "User" (
     "user_id" UUID NOT NULL DEFAULT gen_random_uuid(),
-    "name" TEXT NOT NULL DEFAULT '',
+    "user_display_name" TEXT NOT NULL DEFAULT '',
     "username" TEXT NOT NULL DEFAULT '',
     "password" VARCHAR,
 
@@ -21,63 +21,114 @@ CREATE TABLE "UserOnBusiness" (
     "user_id" UUID NOT NULL,
     "business_id" UUID NOT NULL,
     "role" VARCHAR NOT NULL,
-    "assignedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "assignedBy" TEXT NOT NULL,
 
     CONSTRAINT "UserOnBusiness_pkey" PRIMARY KEY ("user_id","business_id")
 );
 
 -- CreateTable
+CREATE TABLE "BusinessDailyData" (
+    "business_id" UUID NOT NULL,
+    "date" TIMESTAMP(6) NOT NULL,
+    "business_total_sales" INTEGER,
+    "business_total_orders" INTEGER,
+    "business_average_sales_order" INTEGER,
+    "business_total_reach" INTEGER,
+    "business_ads_spent" INTEGER,
+    "business_average_cost_per_reach" INTEGER,
+
+    CONSTRAINT "BusinessDailyData_pkey" PRIMARY KEY ("business_id","date")
+);
+
+-- CreateTable
 CREATE TABLE "Shopify" (
     "shopify_id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "business_id" UUID NOT NULL,
+    "shopify_url" VARCHAR NOT NULL,
     "shopify_api_key" VARCHAR,
     "shopify_api_secret_key" VARCHAR,
     "shopify_merchant_link" VARCHAR,
+    "shopify_access_token" VARCHAR,
     "shopify_name" VARCHAR,
+<<<<<<< HEAD
     "shopify_url" VARCHAR NOT NULL,
     "access_token" VARCHAR,
+=======
+>>>>>>> c02e6cf (amended schema based on new relational diagram.)
     "currency_code" TEXT,
-    "business_id" UUID NOT NULL,
+    "created_at" TIMESTAMP(6) NOT NULL,
+    "updated_at" TIMESTAMP(6) NOT NULL,
+    "deleted_at" TIMESTAMP(6) NOT NULL,
 
     CONSTRAINT "Shopify_pkey" PRIMARY KEY ("shopify_id")
 );
 
 -- CreateTable
-CREATE TABLE "Daily_insight" (
+CREATE TABLE "ShopifyDailyData" (
+    "date" TIMESTAMP(6) NOT NULL,
+    "shopify_id" UUID NOT NULL,
+    "shopify_total_order" INTEGER,
+    "shopify_total_sales" INTEGER,
+    "shopify_total_refund" INTEGER,
+    "shopify_average_order_sales" INTEGER,
+    "business_id" UUID NOT NULL,
+
+    CONSTRAINT "ShopifyDailyData_pkey" PRIMARY KEY ("date","shopify_id")
+);
+
+-- CreateTable
+CREATE TABLE "ShopifyTransaction" (
+    "shopify_transaction_id" VARCHAR NOT NULL,
+    "shopify_transaction_created_at" TIMESTAMP(6),
+    "shopify_transaction_kind" VARCHAR,
+    "shopify_transaction_status" VARCHAR,
+    "shopify_transaction_shop_amount" INTEGER,
+    "shopify_order_id" VARCHAR NOT NULL,
+    "shopify_id" UUID NOT NULL,
+
+    CONSTRAINT "ShopifyTransaction_pkey" PRIMARY KEY ("shopify_transaction_id")
+);
+
+-- CreateTable
+CREATE TABLE "Facebook" (
+    "facebook_id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "facebook_name" TEXT NOT NULL,
+    "facebook_token" TEXT NOT NULL,
+    "facebook_code" TEXT NOT NULL,
     "created_at" TIMESTAMP(6) NOT NULL,
-    "total_sales_amount" INTEGER,
-    "total_refunds_amount" INTEGER,
-    "shopify_id" UUID NOT NULL,
+    "updated_at" TIMESTAMP(6) NOT NULL,
+    "deleted_at" TIMESTAMP(6) NOT NULL,
+    "business_id" UUID NOT NULL,
 
-    CONSTRAINT "Daily_insight_pkey" PRIMARY KEY ("created_at","shopify_id")
+    CONSTRAINT "Facebook_pkey" PRIMARY KEY ("facebook_id")
 );
 
 -- CreateTable
-CREATE TABLE "Order" (
-    "order_id" VARCHAR NOT NULL,
-    "order_created_at" TIMESTAMP(6),
-    "order_payment_status" VARCHAR,
-    "order_fulfilment_status" VARCHAR,
-    "total_discount_amount" INTEGER,
-    "order_total_price" INTEGER,
-    "order_total_received" INTEGER,
-    "order_total_refunded" INTEGER,
-    "order_net_payment" INTEGER,
-    "shopify_id" UUID NOT NULL,
+CREATE TABLE "FacebookDailyData" (
+    "date" DATE NOT NULL,
+    "facebook_id" UUID NOT NULL,
+    "facebook_reach" DECIMAL,
+    "facebook_impression" DECIMAL,
+    "facebook_frequency" DECIMAL,
+    "facebook_amount_spent" DECIMAL,
+    "facebook_cpm" DECIMAL,
+    "facebook_outbound_clicks_ctr" DECIMAL,
+    "facebook_view_content" DECIMAL,
+    "facebook_cost_per_view_content" DECIMAL,
+    "facebook_add_to_cart" DECIMAL,
+    "facebook_cost_per_add_to_cart" DECIMAL,
+    "facebook_initiate_checkout" DECIMAL,
+    "facebook_cost_per_initiate_checkout" DECIMAL,
+    "facebook_purchase" DECIMAL,
+    "facebook_website_purchase" DECIMAL,
+    "facebook_offline_purcase" DECIMAL,
+    "facebook_cost_per_purchase" DECIMAL,
+    "facebook_purchase_conversion_value" DECIMAL,
+    "facebook_website_purchase_conversion_value" DECIMAL,
+    "facebook_offline_purchase_conversion_value" DECIMAL,
+    "facebook_purchase_roas" DECIMAL,
+    "business_id" UUID NOT NULL,
 
-    CONSTRAINT "Order_pkey" PRIMARY KEY ("order_id")
-);
-
--- CreateTable
-CREATE TABLE "Transaction" (
-    "transaction_id" VARCHAR NOT NULL,
-    "transaction_created_at" TIMESTAMP(6),
-    "transaction_kind" VARCHAR,
-    "transaction_status" VARCHAR,
-    "transaction_shop_amount" INTEGER,
-    "order_id" VARCHAR NOT NULL,
-
-    CONSTRAINT "Transaction_pkey" PRIMARY KEY ("transaction_id")
+    CONSTRAINT "FacebookDailyData_pkey" PRIMARY KEY ("date","facebook_id")
 );
 
 -- CreateIndex
@@ -87,19 +138,22 @@ CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 CREATE UNIQUE INDEX "Business_business_id_key" ON "Business"("business_id");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Business_business_name_key" ON "Business"("business_name");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Shopify_shopify_id_key" ON "Shopify"("shopify_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Shopify_shopify_url_key" ON "Shopify"("shopify_url");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Shopify_access_token_key" ON "Shopify"("access_token");
+CREATE UNIQUE INDEX "Shopify_shopify_access_token_key" ON "Shopify"("shopify_access_token");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Order_order_id_key" ON "Order"("order_id");
+CREATE UNIQUE INDEX "Shopify_business_id_shopify_url_key" ON "Shopify"("business_id", "shopify_url");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Transaction_transaction_id_key" ON "Transaction"("transaction_id");
+CREATE UNIQUE INDEX "ShopifyTransaction_shopify_transaction_id_key" ON "ShopifyTransaction"("shopify_transaction_id");
 
 -- AddForeignKey
 ALTER TABLE "UserOnBusiness" ADD CONSTRAINT "UserOnBusiness_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("user_id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -108,14 +162,23 @@ ALTER TABLE "UserOnBusiness" ADD CONSTRAINT "UserOnBusiness_user_id_fkey" FOREIG
 ALTER TABLE "UserOnBusiness" ADD CONSTRAINT "UserOnBusiness_business_id_fkey" FOREIGN KEY ("business_id") REFERENCES "Business"("business_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "BusinessDailyData" ADD CONSTRAINT "BusinessDailyData_business_id_fkey" FOREIGN KEY ("business_id") REFERENCES "Business"("business_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Shopify" ADD CONSTRAINT "Shopify_business_id_fkey" FOREIGN KEY ("business_id") REFERENCES "Business"("business_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Daily_insight" ADD CONSTRAINT "Daily_insight_shopify_id_fkey" FOREIGN KEY ("shopify_id") REFERENCES "Shopify"("shopify_id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ShopifyDailyData" ADD CONSTRAINT "ShopifyDailyData_shopify_id_fkey" FOREIGN KEY ("shopify_id") REFERENCES "Shopify"("shopify_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Order" ADD CONSTRAINT "Order_shopify_id_fkey" FOREIGN KEY ("shopify_id") REFERENCES "Shopify"("shopify_id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ShopifyDailyData" ADD CONSTRAINT "ShopifyDailyData_business_id_fkey" FOREIGN KEY ("business_id") REFERENCES "Business"("business_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_order_id_fkey" FOREIGN KEY ("order_id") REFERENCES "Order"("order_id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ShopifyTransaction" ADD CONSTRAINT "ShopifyTransaction_shopify_id_fkey" FOREIGN KEY ("shopify_id") REFERENCES "Shopify"("shopify_id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Facebook" ADD CONSTRAINT "Facebook_business_id_fkey" FOREIGN KEY ("business_id") REFERENCES "Business"("business_id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "FacebookDailyData" ADD CONSTRAINT "FacebookDailyData_business_id_fkey" FOREIGN KEY ("business_id") REFERENCES "Business"("business_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
