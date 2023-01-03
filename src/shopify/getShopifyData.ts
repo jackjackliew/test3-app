@@ -1,5 +1,14 @@
 import { insertDailyTotalRefunds, insertDailyTotalSales } from './insertShopifyData';
 
+export const getShopifyUrl = async (shopUrl: any, prisma: any) => {
+  const getShopifyUrl = await prisma.shopify.findUnique({
+    where: {
+      shopify_url: shopUrl,
+    },
+  });
+  return getShopifyUrl;
+}
+
 export const getOrderById = async (orderId: any, prisma: any) => {
   const getOrderById = await prisma.order.findUnique({
     where: {

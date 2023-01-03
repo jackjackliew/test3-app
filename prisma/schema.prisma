@@ -43,7 +43,7 @@ model Shopify {
   shopify_merchant_link  String? @db.VarChar
   shopify_name           String? @db.VarChar
   shopify_url            String  @unique @db.VarChar
-  access_token           String  @unique @db.VarChar
+  access_token           String? @unique @db.VarChar
   currency_code          String?
 
   orders         Order[]

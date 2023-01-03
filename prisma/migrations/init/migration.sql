@@ -35,7 +35,7 @@ CREATE TABLE "Shopify" (
     "shopify_merchant_link" VARCHAR,
     "shopify_name" VARCHAR,
     "shopify_url" VARCHAR NOT NULL,
-    "access_token" VARCHAR NOT NULL,
+    "access_token" VARCHAR,
     "currency_code" TEXT,
     "business_id" UUID NOT NULL,
 

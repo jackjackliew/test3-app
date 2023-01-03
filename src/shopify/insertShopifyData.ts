@@ -1,14 +1,28 @@
-export const insertShopify = async (shopify: any, accessToken: any, business: any, prisma: any) => {
+export const insertShopifyUrl = async (shopUrl: any, businessId: any, prisma: any) => {
+  const insertShopifyUrl = await prisma.shopify.upsert({
+    where: {
+      shopify_url: shopUrl,
+    },
+    update: {},
+    create: {
+      shopify_url: shopUrl,
+      business_id: businessId,
+    },
+  });
+}
+
+export const insertShopify = async (shop: any, shopify: any, accessToken: any, business: any, prisma: any) => {
   const insertShop = await prisma.shopify.upsert({
     where: {
-      shopify_id: shopify.id,
+      shopify_id: shop.id,
     },
     update: {
       shopify_name: shopify.name,
       access_token: accessToken,
+      business_id: business.id,
+      currency_code: shopify.currencyCode,
     },
     create: {
-      shopify_id: shopify.id,
       shopify_name: shopify.name,
       shopify_url: shopify.url,
       access_token: accessToken,

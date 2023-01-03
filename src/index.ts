@@ -4,8 +4,8 @@ import Shopify, { ApiVersion, AuthQuery } from '@shopify/shopify-api';
 import cron from 'node-cron';
 import bodyParser from 'body-parser';
 import { PrismaClient } from '@prisma/client';
-import { insertShopify, insertOrder, insertTransaction } from './shopify/insertShopifyData';
-import { getDailyTotalRefunds, getDailyTotalSales, getTotalRefundsTransaction, getTotalSalesTransaction } from './shopify/getShopifyData';
+import { insertShopify, insertOrder, insertTransaction, insertShopifyUrl } from './shopify/insertShopifyData';
+import { getDailyTotalRefunds, getDailyTotalSales, getShopifyUrl, getTotalRefundsTransaction, getTotalSalesTransaction } from './shopify/getShopifyData';
 import { insertBusiness } from './business/insertBusiness';
 import { getShopify, getOrdersWithDate } from './shopify/query';
 import { shopifySetup } from './shopify/shopifySetup';
@@ -123,6 +123,7 @@ app.get('/insertshop', async (req, res) => {
 
 app.get('/login', async (req, res) => {
   shop = req.query.shop_name;
+  insertShopifyUrl(shop, business, prisma);
 
   let authRoute = await Shopify.Auth.beginAuth(req, res, shop, '/auth/callback', false);
   console.log(authRoute);
@@ -158,8 +159,9 @@ app.get('/shopify/success', async (req, res) => {
     });
 
     console.log(shopId.body.data.shop);
-    storedShopId = shopId.body.data.shop.id;
-    await insertShopify(shopId.body.data.shop, accessToken, business, prisma);
+    let getShopifyUrlResult = await getShopifyUrl(shopId.body.data.shop.url, prisma);
+    // storedShopId = shopId.body.data.shop.url;
+    await insertShopify(getShopifyUrlResult, shopId.body.data.shop, accessToken, business, prisma);
 
     // res.send(
     //   `<html>
