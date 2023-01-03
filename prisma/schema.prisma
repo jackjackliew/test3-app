@@ -61,6 +61,11 @@ model Shopify {
   shopify_merchant_link  String? @db.VarChar
   shopify_access_token   String? @unique @db.VarChar
   shopify_name           String? @db.VarChar
+<<<<<<< HEAD
+=======
+  shopify_url            String  @unique @db.VarChar
+  access_token           String? @unique @db.VarChar
+>>>>>>> f365689 (using the old schema, need to pull new schema)
   currency_code          String?
 
   created_at DateTime @db.Timestamp(6)

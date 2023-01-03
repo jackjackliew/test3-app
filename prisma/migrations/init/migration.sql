@@ -50,10 +50,17 @@ CREATE TABLE "Shopify" (
     "shopify_access_token" VARCHAR,
     "shopify_name" VARCHAR,
 <<<<<<< HEAD
+<<<<<<< HEAD
     "shopify_url" VARCHAR NOT NULL,
     "access_token" VARCHAR,
 =======
 >>>>>>> c02e6cf (amended schema based on new relational diagram.)
+=======
+=======
+    "shopify_url" VARCHAR NOT NULL,
+    "access_token" VARCHAR,
+>>>>>>> f365689 (using the old schema, need to pull new schema)
+>>>>>>> a6e455b (using the old schema, need to pull new schema)
     "currency_code" TEXT,
     "created_at" TIMESTAMP(6) NOT NULL,
     "updated_at" TIMESTAMP(6) NOT NULL,
